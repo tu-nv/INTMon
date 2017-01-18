@@ -100,7 +100,7 @@ public class IntMon {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-//    private static final TpPort UDP_INT_PORT = TpPort.tpPort(5431);
+   //    private static final TpPort UDP_INT_PORT = TpPort.tpPort(5431);
 
     // variables
     private ApplicationId appId;
@@ -110,14 +110,16 @@ public class IntMon {
     private Topology topo;
 
     //    private static final String APP_NAME = "org.onosproject.intmon";
-//    private static final String MODEL_NAME = "IntMon";
-//    private static final String JSON_CONFIG_PATH = "~/onos-p4-dev/p4src/build/default.json";
+    //    private static final String MODEL_NAME = "IntMon";
+    //    private static final String JSON_CONFIG_PATH = "~/onos-p4-dev/p4src/build/default.json";
     private static final String JSON_CONFIG_PATH = "/intmon.json";
 
     private static final Bmv2Configuration INTMON_CONFIGURATION = loadConfiguration();
     private static final IntMonInterpreter INTMON_INTERPRETER = new IntMonInterpreter();
     protected static final Bmv2DeviceContext INTMON_CONTEXT = new Bmv2DeviceContext(INTMON_CONFIGURATION, INTMON_INTERPRETER);
     private static final int FLOW_PRIORITY = 100;
+   Map<String, Integer> tableMap;
+
 
 
     @Activate
@@ -126,11 +128,6 @@ public class IntMon {
         appId = coreService.getAppId("org.onosproject.intmon");
         processor = new SwitchPacketProcesser();
         packetService.addProcessor(processor, PacketProcessor.director(3));
-        // Restricts packet
-//        packetService.requestPackets(DefaultTrafficSelector.builder()
-//                                             .matchIPProtocol((byte)0x09).build(),
-//                                     PacketPriority.REACTIVE, appId, Optional.empty());
-
         bmv2ContextService.registerInterpreterClassLoader(INTMON_CONTEXT.interpreter().getClass(),
                                                           this.getClass().getClassLoader());
 
@@ -141,9 +138,9 @@ public class IntMon {
         topo = topologyService.currentTopology();
         TopologyGraph graph = topologyService.getGraph(topo);
         graph.getVertexes().stream()
-                .map(TopologyVertex::deviceId)
-                .forEach(did -> switches.add(did));
-//
+              .map(TopologyVertex::deviceId)
+              .forEach(did -> switches.add(did));
+       //
         for (DeviceId did : switches) {
             // did.uri().getFragment()
             log.info("intmon: " + did.uri().getFragment());
@@ -151,45 +148,18 @@ public class IntMon {
 
         // build flow rule
 
-//        Bmv2Configuration myConfiguration = INTMON_CONTEXT.configuration();
-        Map<String, Integer> tableMap = INTMON_CONTEXT.interpreter().tableIdMap().inverse();
+       // Bmv2Configuration myConfiguration = INTMON_CONTEXT.configuration();
+       tableMap = INTMON_CONTEXT.interpreter().tableIdMap().inverse();
 
         for (String s : tableMap.keySet()) {
             log.info(s + " " + tableMap.get(s));
         }
 
         for (DeviceId did : switches) {
-//            int didNum = Integer.parseInt(did.uri().getFragment());
+           // int didNum = Integer.parseInt(did.uri().getFragment());
 
-            ExtensionSelector extSelector = Bmv2ExtensionSelector.builder()
-                    .forConfiguration(INTMON_CONFIGURATION)
-                    .matchExact("standard_metadata", "instance_type", 0)
-//                    .matchLpm("ipv4", "dstAddr", dstPrefix.address().toOctets(), dstPrefix.prefixLength())
-                    .build();
-
-            ExtensionTreatment extTreatment = Bmv2ExtensionTreatment.builder()
-                    .forConfiguration(INTMON_CONFIGURATION)
-                    .setActionName("do_copy_to_cpu")
-//                    .addParameter("nhop_id", 4)
-                    .build();
-//
-            FlowRule rule = DefaultFlowRule.builder()
-                    .forDevice(did)
-                    .fromApp(appId)
-                    // we need to map table name (string) to table id (number)
-                    .forTable(tableMap.get("mirror_int_to_cpu"))
-                    .withSelector(DefaultTrafficSelector.builder()
-                                          .extension(extSelector, did)
-                                          .build())
-                    .withTreatment(DefaultTrafficTreatment.builder()
-                                           .extension(extTreatment, did)
-                                           .build())
-                    .withPriority(FLOW_PRIORITY)
-                    .makePermanent()
-                    .build();
-//
-            // install flow rule
-            flowRuleService.applyFlowRules(rule);
+           //            installRuleMirrorIntToCpu(did);
+           //            installRuleIntBos(did);
         }
     }
 
@@ -199,19 +169,68 @@ public class IntMon {
         packetService.removeProcessor(processor);
     }
 
+   //
+   private void installRuleMirrorIntToCpu(DeviceId did) {
+      // mirror_int_to_cpu ---------------------
+      ExtensionSelector extSelector = Bmv2ExtensionSelector.builder().forConfiguration(INTMON_CONFIGURATION)
+            .matchExact("standard_metadata", "instance_type", 0)
+            // .matchLpm("ipv4", "dstAddr", dstPrefix.address().toOctets(), dstPrefix.prefixLength())
+            .build();
+
+      ExtensionTreatment extTreatment = Bmv2ExtensionTreatment.builder().forConfiguration(INTMON_CONFIGURATION)
+            .setActionName("do_copy_to_cpu")
+            // .addParameter("nhop_id", 4)
+            .build();
+      //
+      FlowRule rule = DefaultFlowRule.builder().forDevice(did).fromApp(appId)
+            // we need to map table name (string) to table id (number)
+            .withSelector(DefaultTrafficSelector.builder().extension(extSelector, did).build())
+            .withTreatment(DefaultTrafficTreatment.builder().extension(extTreatment, did).build())
+            .withPriority(FLOW_PRIORITY)
+            .makePermanent()
+            .forTable(tableMap.get("mirror_int_to_cpu"))
+            .build();
+
+      // install flow rule
+      flowRuleService.applyFlowRules(rule);
+   }
+
+   private void installRuleIntBos(DeviceId did) {
+      // mirror_int_to_cpu ---------------------
+      ExtensionSelector extSelector = Bmv2ExtensionSelector.builder().forConfiguration(INTMON_CONFIGURATION)
+            //              .matchExact("standard_metadata", "instance_type", 0)
+            .build();
+
+      ExtensionTreatment extTreatment = Bmv2ExtensionTreatment.builder().forConfiguration(INTMON_CONFIGURATION)
+            .setActionName("int_set_header_7_bos")
+            .build();
+      //
+      FlowRule rule = DefaultFlowRule.builder().forDevice(did).fromApp(appId)
+            // we need to map table name (string) to table id (number)
+            .withSelector(DefaultTrafficSelector.builder().extension(extSelector, did).build())
+            .withTreatment(DefaultTrafficTreatment.builder().extension(extTreatment, did).build())
+            .withPriority(FLOW_PRIORITY)
+            .makePermanent()
+            .forTable(tableMap.get("int_bos"))
+            .build();
+
+      // install flow rule
+      flowRuleService.applyFlowRules(rule);
+   }
+
     private class SwitchPacketProcesser implements PacketProcessor {
         @Override
         public void process(PacketContext pc) {
-//            if (pc.inPacket().parsed().getEtherType() == Ethernet.TYPE_IPV4) {
-//                log.info("intmon: ipv4" + pc.toString());
-//            }
+           //            if (pc.inPacket().parsed().getEtherType() == Ethernet.TYPE_IPV4) {
+           //                log.info("intmon: ipv4" + pc.toString());
+           //            }
         }
     }
 
     private static Bmv2Configuration loadConfiguration() {
         try {
             JsonObject json = Json.parse(new BufferedReader(new InputStreamReader(
-                    IntMon.class.getResourceAsStream(JSON_CONFIG_PATH)))).asObject();
+                  IntMon.class.getResourceAsStream(JSON_CONFIG_PATH)))).asObject();
             return Bmv2DefaultConfiguration.parse(json);
         } catch (IOException e) {
             throw new RuntimeException("Unable to load configuration", e);
@@ -219,11 +238,19 @@ public class IntMon {
     }
 
     public void deployDevices() {
-        Set<Device> devices = Sets.newHashSet();
-        switches.stream().map(deviceService::getDevice)
-                .forEach(device -> devices.add(device));
-        for (Device device : devices) {
-            DeviceId deviceId = device.id();
+       //        Set<Device> devices = Sets.newHashSet();
+       //        switches.stream().map(deviceService::getDevice)
+       //              .forEach(device -> devices.add(device));
+       //        for (Device device : devices) {
+       //            DeviceId deviceId = device.id();
+
+       topo = topologyService.currentTopology();
+       TopologyGraph graph = topologyService.getGraph(topo);
+       graph.getVertexes().stream()
+             .map(TopologyVertex::deviceId)
+             .forEach(did -> switches.add(did));
+
+       for (DeviceId deviceId : switches) {
 
             // Synchronize executions over the same device.
             //        Lock lock = deviceLocks.computeIfAbsent(deviceId, k -> new ReentrantLock());
@@ -231,11 +258,11 @@ public class IntMon {
 
             try {
                 // Set context if not already done.
-//                if (!contextFlags.getOrDefault(deviceId, false)) {
-//                    log.info("Setting context to {} for {}...", configurationName, deviceId);
+               //                if (!contextFlags.getOrDefault(deviceId, false)) {
+               //                    log.info("Setting context to {} for {}...", configurationName, deviceId);
                 bmv2ContextService.setContext(deviceId, INTMON_CONTEXT);
-//                    contextFlags.put(device.id(), true);
-//                }
+               //                    contextFlags.put(device.id(), true);
+               //                }
 
             } finally {
                 //            lock.unlock();
