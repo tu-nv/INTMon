@@ -26,13 +26,13 @@ public class IntMonInterpreter implements Bmv2Interpreter {
     public static final String PORT = "port";
     public static final String DROP = "_drop";
     public static final String SET_EGRESS_PORT = "set_egress_port";
-    public static final String INT_INSERT = "int_insert";
-    public static final String INT_INST_0003 = "int_inst_0003";
-    public static final String INT_INST_0407 = "int_inst_0407";
-    public static final String INT_BOS = "int_bos";
-    public static final String INT_META_HEADER_UPDATE = "int_meta_header_update";
+    public static final String TB_INT_INSERT = "tb_int_insert";
+    public static final String TB_INT_INST_0003 = "tb_int_inst_0003";
+    public static final String TB_INT_INST_0407 = "tb_int_inst_0407";
+    public static final String TB_INT_BOS = "tb_int_bos";
+    public static final String TB_INT_META_HEADER_UPDATE = "tb_int_meta_header_update";
     public static final String MIRROR_INT_TO_CPU = "mirror_int_to_cpu";
-    public static final String INT_OUTER_ENCAP = "int_outer_encap";
+    public static final String TB_INT_OUTER_ENCAP = "tb_int_outer_encap";
 
 
     private static final ImmutableBiMap<Criterion.Type, String> CRITERION_MAP = ImmutableBiMap.of(
@@ -50,12 +50,12 @@ public class IntMonInterpreter implements Bmv2Interpreter {
     private static final ImmutableBiMap<Integer, String> TABLE_MAP = new ImmutableBiMap.Builder<Integer, String>()
             .put(0, TABLE0)
             .put(1, PORT_COUNT_TABLE)
-            .put(2, INT_INST_0003)
-            .put(3, INT_INST_0407)
-            .put(4, INT_BOS)
-            .put(5, INT_META_HEADER_UPDATE)
-            .put(6, INT_INSERT)
-            .put(7, INT_OUTER_ENCAP)
+            .put(2, TB_INT_INST_0003)
+            .put(3, TB_INT_INST_0407)
+            .put(4, TB_INT_BOS)
+            .put(5, TB_INT_META_HEADER_UPDATE)
+            .put(6, TB_INT_INSERT)
+            .put(7, TB_INT_OUTER_ENCAP)
             .put(8, MIRROR_INT_TO_CPU)
             .build();
 
