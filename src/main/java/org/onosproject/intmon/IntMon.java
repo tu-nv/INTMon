@@ -27,6 +27,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.onlab.packet.Ethernet;
 import org.onlab.packet.IPv4;
 import org.onlab.packet.IpAddress;
+import org.onlab.packet.UDP;
 import org.onosproject.bmv2.api.context.Bmv2Configuration;
 import org.onosproject.bmv2.api.context.Bmv2DefaultConfiguration;
 import org.onosproject.bmv2.api.context.Bmv2DeviceContext;
@@ -65,6 +66,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Set;
 
@@ -104,7 +106,7 @@ public class IntMon implements IntMonService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    //    private static final TpPort UDP_INT_PORT = TpPort.tpPort(5431);
+    private static final int UDP_DST_PORT_INT = 54321;
 
     // variables
     private ApplicationId appId;
@@ -709,6 +711,23 @@ public class IntMon implements IntMonService {
 //            if (pc.inPacket().parsed().getEtherType() == Ethernet.TYPE_IPV4) {
 //                log.info("intmon: ipv4" + pc.toString());
 //            }
-                    }
+
+            InboundPacket pkt = pc.inPacket();
+            Ethernet ethPkt = pkt.parsed();
+            if (ethPkt.getEtherType() != Ethernet.TYPE_IPV4) return;
+
+            IPv4 ipv4Pkt = (IPv4) ethPkt.getPayload();
+            if (ipv4Pkt.getProtocol() != IPv4.PROTOCOL_UDP) return;
+
+            UDP udpPkt = (UDP) ipv4Pkt.getPayload();
+            if (udpPkt.getDestinationPort() != UDP_DST_PORT_INT) return;
+
+            byte[] intRaw = udpPkt.getPayload().serialize();
+            IntUDP intUdpPkt = IntUDP.deserialize(intRaw, 0, intRaw.length);
+
+            if (intUdpPkt.o != 1) return;
+
+            log.info("---received int to onos packet");
+        }
     }
 }
