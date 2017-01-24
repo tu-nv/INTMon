@@ -13,10 +13,7 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.onosproject</groupId>
@@ -73,16 +70,32 @@
             <scope>provided</scope>
         </dependency>
 
+        <!--<dependency>-->
+            <!--<groupId>org.onosproject</groupId>-->
+            <!--<artifactId>onos-bmv2-protocol-api</artifactId>-->
+            <!--<version>${onos.version}</version>-->
+        <!--</dependency>-->
+
         <dependency>
             <groupId>org.onosproject</groupId>
             <artifactId>onos-bmv2-protocol-api</artifactId>
             <version>${onos.version}</version>
+            <scope>system</scope>
+            <systemPath>/home/tu/onos/protocols/bmv2/api/target/onos-bmv2-protocol-api-1.7.2-SNAPSHOT.jar</systemPath>
         </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>org.onosproject</groupId>-->
+            <!--<artifactId>onos-bmv2-protocol-ctl</artifactId>-->
+            <!--<version>${onos.version}</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.onosproject</groupId>
             <artifactId>onos-bmv2-protocol-ctl</artifactId>
             <version>${onos.version}</version>
+            <scope>system</scope>
+            <systemPath>/home/tu/onos/protocols/bmv2/ctl/target/onos-bmv2-protocol-ctl-1.7.2-SNAPSHOT.jar</systemPath>
         </dependency>
     </dependencies>
 

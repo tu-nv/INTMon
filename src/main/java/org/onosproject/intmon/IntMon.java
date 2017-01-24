@@ -23,6 +23,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.Service;
+import org.onlab.packet.Ethernet;
+import org.onlab.packet.IPv4;
 import org.onlab.packet.IpAddress;
 import org.onosproject.bmv2.api.context.Bmv2Configuration;
 import org.onosproject.bmv2.api.context.Bmv2DefaultConfiguration;
@@ -48,6 +51,7 @@ import org.onosproject.net.flow.instructions.ExtensionTreatment;
 import org.onosproject.net.host.HostEvent;
 import org.onosproject.net.host.HostListener;
 import org.onosproject.net.host.HostService;
+import org.onosproject.net.packet.InboundPacket;
 import org.onosproject.net.packet.PacketContext;
 import org.onosproject.net.packet.PacketProcessor;
 import org.onosproject.net.packet.PacketService;
@@ -68,9 +72,11 @@ import static org.onosproject.net.host.HostEvent.Type.HOST_ADDED;
 
 /**
  * Skeletal ONOS application component.
+ * make this act as a service
  */
 @Component(immediate = true)
-public class IntMon {
+@Service
+public class IntMon implements IntMonService {
     // Instantiates the relevant services.
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
     protected PacketService packetService;
@@ -168,7 +174,7 @@ public class IntMon {
             installRuleTbIntInst0003(did);
             installRuleTbIntInst0407(did);
             installRuleTbIntBos(did);
-            installRuleSetSource(did);
+//            installRuleSetSource(did);
             installRuleSetSink(did);
             installRuleMirrorIntToCpu(did);
             installMirrorId(did);
@@ -381,7 +387,7 @@ public class IntMon {
                 if (ipAddress != null) {
 //         log.info("hosts: " + host.ipAddresses().toString());
                     ExtensionSelector extSelector = Bmv2ExtensionSelector.builder().forConfiguration(INTMON_CONFIGURATION)
-                            .matchExact("ipv4", "srcAddr", ipAddress.getIp4Address().toInt())
+                            .matchTernary("ipv4", "srcAddr", ipAddress.getIp4Address().toInt(), 0xFFFF_FFFF)
                             .build();
 
                     ExtensionTreatment extTreatment = Bmv2ExtensionTreatment.builder().forConfiguration(INTMON_CONFIGURATION)
@@ -404,6 +410,66 @@ public class IntMon {
         }
     }
 
+    private void installRuleSetSource(DeviceId did, FlowsFilter flowsFilter) {
+        Set<Host> conHosts = Sets.newHashSet();
+        conHosts = hostService.getConnectedHosts(did);
+        for (Host host : conHosts) {
+            for (IpAddress ipAddress : host.ipAddresses()) {
+                if (ipAddress != null) {
+//         log.info("hosts: " + host.ipAddresses().toString());
+                    Bmv2ExtensionSelector.Builder exSelectorBuilder = Bmv2ExtensionSelector.builder().forConfiguration(INTMON_CONFIGURATION);
+
+                    if (flowsFilter.ip4SrcPrefix != null) {
+                        if (flowsFilter.ip4SrcPrefix.contains(ipAddress)) {
+                            exSelectorBuilder = exSelectorBuilder.matchTernary("ipv4", "srcAddr",
+                                                                               ipAddress.getIp4Address().toInt(),
+                                                                               0xFFFF_FFFF);
+                        }
+                    } else {
+                        exSelectorBuilder = exSelectorBuilder.matchTernary("ipv4", "srcAddr",
+                                                                           ipAddress.getIp4Address().toInt(),
+                                                                           0xFFFF_FFFF);
+                    }
+
+                    if (flowsFilter.ip4DstPrefix != null) {
+                        exSelectorBuilder = exSelectorBuilder.matchTernary("ipv4", "dstAddr",
+                                                                           flowsFilter.ip4DstPrefix.address().toInt(),
+                                                                           (0xFFFFFFFF << (32 - flowsFilter.ip4DstPrefix.prefixLength())) & 0xFFFFFFFF);
+                    }
+
+                    if (flowsFilter.srcPort != null) {
+                        exSelectorBuilder = exSelectorBuilder.matchTernary("udp", "srcPort",
+                                                                           flowsFilter.srcPort, 0xFFFF);
+                    }
+
+                    if (flowsFilter.dstPort != null) {
+                        exSelectorBuilder = exSelectorBuilder.matchTernary("udp", "dstPort",
+                                                                           flowsFilter.dstPort, 0xFFFF);
+                    }
+//                    ExtensionSelector extSelector = Bmv2ExtensionSelector.builder().forConfiguration(INTMON_CONFIGURATION)
+//                            .matchTernary("ipv4", "srcAddr", ipAddress.getIp4Address().toInt(), 0xFFFF_FFFF)
+//                            .build();
+
+                    ExtensionTreatment extTreatment = Bmv2ExtensionTreatment.builder().forConfiguration(INTMON_CONFIGURATION)
+                            .setActionName("int_set_source")
+                            .build();
+                    //
+                    FlowRule rule = DefaultFlowRule.builder().forDevice(did).fromApp(appId)
+                            // we need to map table name (string) to table id (number)
+                            .withSelector(DefaultTrafficSelector.builder().extension(exSelectorBuilder.build(), did).build())
+                            .withTreatment(DefaultTrafficTreatment.builder().extension(extTreatment, did).build())
+                            .withPriority(FLOW_PRIORITY)
+                            .makePermanent()
+                            .forTable(tableMap.get("tb_set_source"))
+                            .build();
+
+                    // install flow rule
+                    flowRuleService.applyFlowRules(rule);
+                }
+            }
+        }
+    }
+
     private void installRuleSetSink(DeviceId did) {
         Set<Host> conHosts = Sets.newHashSet();
         conHosts = hostService.getConnectedHosts(did);
@@ -412,7 +478,7 @@ public class IntMon {
                 if (ipAddress != null) {
 //         log.info("hosts: " + host.ipAddresses().toString());
                     ExtensionSelector extSelector = Bmv2ExtensionSelector.builder().forConfiguration(INTMON_CONFIGURATION)
-                            .matchExact("ipv4", "dstAddr", ipAddress.getIp4Address().toInt())
+                            .matchTernary("ipv4", "dstAddr", ipAddress.getIp4Address().toInt(), 0xFFFF_FFFF) //----------------- right? (int type)
                             .build();
 
                     ExtensionTreatment extTreatment = Bmv2ExtensionTreatment.builder().forConfiguration(INTMON_CONFIGURATION)
@@ -549,15 +615,6 @@ public class IntMon {
         }
     }
 
-    private class SwitchPacketProcesser implements PacketProcessor {
-        @Override
-        public void process(PacketContext pc) {
-            //            if (pc.inPacket().parsed().getEtherType() == Ethernet.TYPE_IPV4) {
-            //                log.info("intmon: ipv4" + pc.toString());
-            //            }
-        }
-    }
-
     private static Bmv2Configuration loadConfiguration() {
         try {
             JsonObject json = Json.parse(new BufferedReader(new InputStreamReader(
@@ -609,7 +666,7 @@ public class IntMon {
             for (DeviceId did : switches) {
                 // int didNum = Integer.parseInt(did.uri().getFragment());
 
-                installRuleSetSource(did);
+//                installRuleSetSource(did);
                 installRuleSetSink(did);
                 installRuleMirrorIntToCpu(did);
                 log.info("----------- new hosts ------------");
@@ -630,5 +687,28 @@ public class IntMon {
         } catch (Bmv2RuntimeException e) {
             log.info("error--- mirroring---");
         }
+    }
+
+    @Override
+    public void setMonFlows(FlowsFilter flowsFilter) {
+        for (DeviceId did : switches) {
+            // int didNum = Integer.parseInt(did.uri().getFragment());
+
+//            installRuleSetSource(did);
+            installRuleSetSink(did);
+            installRuleMirrorIntToCpu(did);
+
+            installRuleSetSource(did, flowsFilter);
+        }
+        log.info("---setMonFlows");
+    }
+
+    private class SwitchPacketProcesser implements PacketProcessor {
+        @Override
+        public void process(PacketContext pc) {
+//            if (pc.inPacket().parsed().getEtherType() == Ethernet.TYPE_IPV4) {
+//                log.info("intmon: ipv4" + pc.toString());
+//            }
+                    }
     }
 }
