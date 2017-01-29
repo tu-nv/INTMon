@@ -739,25 +739,30 @@ public class IntMon implements IntMonService {
                     installRuleSetFirstSw(did);
                 }
 
+                FlowRuleOperations.Builder opsBuilder = FlowRuleOperations.builder();
                 for (FlowsFilter flowsFilter: flowsFilterInsMap.keySet()) {
                     for (DeviceId did : switches) {
                         newRules.add(ruleIntSource(did, flowsFilter, flowsFilterInsMap.get(flowsFilter).getMiddle(),
                                                    flowsFilterInsMap.get(flowsFilter).getRight()));
                         newRules.add(ruleSetSource(did, flowsFilter, flowsFilterInsMap.get(flowsFilter).getRight()));
                     }
-                    removeFlowRules(flowsFilterRulesMap.get(flowsFilter));
+//                    removeFlowRules(flowsFilterRulesMap.get(flowsFilter));
+                    newRules.forEach(opsBuilder::remove);
                     flowsFilterRulesMap.get(flowsFilter).addAll(newRules);
                 }
 
-                try {
-                    java.lang.Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    java.lang.Thread.sleep(100);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
 
+                opsBuilder = opsBuilder.newStage();
                 for (FlowsFilter flowsFilter: flowsFilterInsMap.keySet()) {
-                    installFlowRules(flowsFilterRulesMap.get(flowsFilter));
+//                    installFlowRules(flowsFilterRulesMap.get(flowsFilter));
+                    flowsFilterRulesMap.get(flowsFilter).forEach(opsBuilder::add);
                 }
+                flowRuleService.apply(opsBuilder.build());
 //                for (FlowRule rule : newRules) {
 //                    flowRuleService.applyFlowRules(rule);
 //                }
@@ -810,24 +815,22 @@ public class IntMon implements IntMonService {
 //            for (FlowRule rule : newRules) {
 //                flowRuleService.applyFlowRules(rule);
 //            }
-
+            FlowRuleOperations.Builder opsBuilder = FlowRuleOperations.builder();
             for(DeviceId did: switches) {
                 newRules.add(ruleIntSource(did, flowsFilter, insMask0007, priority));
                 newRules.add(ruleSetSource(did, flowsFilter, priority));
             }
             for( FlowsFilter ff: flowsFilterRulesMap.keySet()) {
-                removeFlowRules(flowsFilterRulesMap.get(ff));
-//                for (FlowRule rule: flowsFilterRulesMap.get(ff)) {
-//                    flowRuleService.removeFlowRules(rule);
-//                }
+//                removeFlowRules(flowsFilterRulesMap.get(ff));
+                flowsFilterRulesMap.get(ff).forEach(opsBuilder::remove);
             }
 //            removeFlowRules(dRules);
 
-            try {
-                java.lang.Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                java.lang.Thread.sleep(100);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
             // keep the id
             Integer oldId = flowsFilterInsMap.get(flowsFilter).getLeft();
@@ -838,12 +841,12 @@ public class IntMon implements IntMonService {
             idFlowsFilterMap.replace(oldId, flowsFilter);
 
             // reinstall all rule
+            opsBuilder = opsBuilder.newStage();
             for( FlowsFilter ff: flowsFilterRulesMap.keySet()) {
-                installFlowRules(flowsFilterRulesMap.get(ff));
-//                for (FlowRule rule: flowsFilterRulesMap.get(ff)) {
-//                    flowRuleService.applyFlowRules(rule);
-//                }
+//                installFlowRules(flowsFilterRulesMap.get(ff));
+                flowsFilterRulesMap.get(ff).forEach(opsBuilder::add);
             }
+            flowRuleService.apply(opsBuilder.build());
 //            installFlowRules(dRules);
 
             return;
@@ -889,21 +892,23 @@ public class IntMon implements IntMonService {
         flowsFilterInsMap.remove(ffToDel);
         idFlowsFilterMap.remove(id);
         */
+
+        FlowRuleOperations.Builder opsBuilder = FlowRuleOperations.builder();
         FlowsFilter ffToDel = idFlowsFilterMap.get(id);
         // remove all rules
         for( FlowsFilter ff: flowsFilterRulesMap.keySet()) {
-            removeFlowRules(flowsFilterRulesMap.get(ff));
-//            for (FlowRule rule: flowsFilterRulesMap.get(ff)) {
-//                flowRuleService.removeFlowRules(rule);
-//            }
+//            removeFlowRules(flowsFilterRulesMap.get(ff));
+            flowsFilterRulesMap.get(ff).forEach(opsBuilder::remove);
         }
         //***************
         // can build using the operation builder to do remove then add sequentially?
-        try {
-            java.lang.Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            java.lang.Thread.sleep(100);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+
 //        removeFlowRules(dRules);
 
         // remove ffToDel
@@ -916,15 +921,15 @@ public class IntMon implements IntMonService {
 
         // reinstall remain rules
 //        installFlowRules(dRules);
+        opsBuilder = opsBuilder.newStage();
         for( FlowsFilter ff: flowsFilterRulesMap.keySet()) {
-            installFlowRules(flowsFilterRulesMap.get(ff));
-//            for (FlowRule rule: flowsFilterRulesMap.get(ff)) {
-//                flowRuleService.applyFlowRules(rule);
-//            }
+//            installFlowRules(flowsFilterRulesMap.get(ff));
+            flowsFilterRulesMap.get(ff).forEach(opsBuilder::add);
         }
+
+        flowRuleService.apply(opsBuilder.build());
         log.info("--- delete Flow Rules");
 //        flowRuleService.apply(flowRuleOperationBuilder.build());
-        // remove ffToDel
     }
 
     @Override
