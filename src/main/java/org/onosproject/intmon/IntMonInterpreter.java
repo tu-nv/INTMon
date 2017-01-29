@@ -64,6 +64,7 @@ public class IntMonInterpreter implements Bmv2Interpreter {
             .put(13, "tb_int_sink")
             .put(14, "tb_int_to_onos")
             .put(15, "tb_restore_port")
+            .put(16, "tb_set_first_sw")
             .build();
 
     @Override

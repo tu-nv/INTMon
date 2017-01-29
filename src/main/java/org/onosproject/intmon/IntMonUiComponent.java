@@ -52,7 +52,8 @@ public class IntMonUiComponent {
     // Factory for UI message handlers
     private final UiMessageHandlerFactory messageHandlerFactory =
             () -> ImmutableList.of(
-                    new IntMonUiMessageHandler()
+                    new IntMonUiMessageHandler(),
+                    new IntMonUiTableMessageHandler()
             );
 
     // Application UI extension

@@ -18,14 +18,9 @@
 .light #ov-int-mon-main .button-panel {
     background-color: #ccf;
 }
+
 .dark #ov-int-mon-main .button-panel {
     background-color: #444;
-}
-
-#ov-int-mon-main .my-button {
-    cursor: pointer;
-    padding: 4px;
-    text-align: center;
 }
 
 #ov-int-mon-main .int-mon-button {
@@ -34,27 +29,47 @@
     text-align: center;
 }
 
-#/*ov-int-mon-main .int-mon-button {
-    cursor: pointer;
-    padding: 4px;
-    text-align: center;
-}*/
 
-.light #ov-int-mon-main .my-button {
+.light #ov-int-mon-main .int-mon-button {
     color: white;
     background-color: #99d;
 }
-.dark #ov-int-mon-main .my-button {
+.dark #ov-int-mon-main .int-mon-button {
     color: black;
     background-color: #aaa;
 }
 
-#ov-int-mon-main .number {
-    font-size: 140%;
-    text-align: right;
+/*---------------------------------------------------------------------------*/
+#ov-int-mon-main h2 {
+    display: inline-block;
 }
 
-#ov-int-mon-main .quote {
-    margin: 10px 20px;
+/* Panel Styling */
+#ov-int-mon-main-item-details-panel.floatpanel {
+    position: absolute;
+    top: 115px;
+}
+
+.light #ov-int-mon-main-item-details-panel.floatpanel {
+    background-color: rgb(229, 234, 237);
+}
+.dark #ov-int-mon-main-item-details-panel.floatpanel {
+    background-color: #3A4042;
+}
+
+#ov-int-mon-main-item-details-panel h3 {
+    margin: 0;
+    font-size: large;
+}
+
+#ov-int-mon-main-item-details-panel h4 {
+    margin: 0;
+}
+
+#ov-int-mon-main-item-details-panel td {
+    padding: 5px;
+}
+#ov-int-mon-main-item-details-panel td.label {
     font-style: italic;
+    opacity: 0.8;
 }

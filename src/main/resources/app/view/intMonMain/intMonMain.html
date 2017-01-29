@@ -1,7 +1,7 @@
 <!-- partial HTML -->
 <div id="ov-int-mon-main">
-<!--
-    <div class="button-panel">
+
+   <!--  <div class="button-panel">
 
         <div class="my-button" ng-click="getData()">
             Fetch Data
@@ -30,16 +30,34 @@
         <p>
             <span class="quote"> {{data.message}} </span>
         </p>
-    </div>
-    -->
+    </div> -->
+    
     <div class="input-panel">  
         <div>
-            <p>
-            Src Address <input type="text" required pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$" ng-model="ip4SrcPrefix">
-            Dst Address <input type="text" required pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$" ng-model="ip4DstPrefix">
-            Src Port <input type="number" ng-model="ip4SrcPort">
-            Dst Port <input type="number" ng-model="ip4DstPort">
-            </p>
+            Src Address
+            <input type="text" required pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$" ng-model="ip4SrcPrefix">
+
+            Dst Address
+            <input type="text" required pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$" ng-model="ip4DstPrefix">
+
+            Src Port 
+            <input type="text" required pattern="^[0-9]{0,5}$" ng-model="ip4SrcPort">
+
+            Dst Port 
+            <input type="text" required pattern="^[0-9]{0,5}$" ng-model="ip4DstPort">
+
+            Priority 
+            <input type="text" required pattern="^[0-9]{0,5}$" ng-model="priority">
+        </div>
+        <div>
+            <input type="checkbox" ng-model= "switchId">Switch Id
+            <input type="checkbox" ng-model= "ingressPortId">Ingress Port Id
+            <input type="checkbox" ng-model= "hopLatency">Hop Latency
+            <input type="checkbox" ng-model= "qOccupancy">Queue Occupancy
+            <input type="checkbox" ng-model= "ingressTstamp">Ingress Time-stamp
+            <input type="checkbox" ng-model= "egressPortId">Egress Port Id
+            <input type="checkbox" ng-model= "qCongestion">Queue Congestion
+            <input type="checkbox" ng-model= "egressPortTxUtilization">Egress Port Tx Utilization
         </div>
     </div>
 
@@ -47,7 +65,67 @@
         <div class = "int-mon-button" ng-click="sendFlowFilterString()">
             Deploy
         </div>
-    <div>
+    </div>
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
+    <div class="tabular-header">
+        <h2>FlowFilters ({{tableData.length}} total)</h2>
+        <div class="ctrl-btns">
+            <div class="refresh" ng-class="{active: autoRefresh}"
+                 icon icon-id="refresh" icon-size="36"
+                 tooltip tt-msg="autoRefreshTip"
+                 ng-click="toggleRefresh()">
+                   
+            </div>
 
+                 <!-- tooltip tt-msg="uninstallTip" -->
+            <div icon icon-size="42" icon-id="garbage"
+                 ng-click="delFlowsFilter()"
+                 ng-class="{active: ctrlBtnState.selection}">
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-list" onos-table-resize>
+
+        <div class="table-header" onos-sortable-header>
+            <table>
+                <tr>
+                    <td colId="id" sortable>FlowsFilter ID </td>
+                    <td colId="srcAddr" sortable>Src Address </td>
+                    <td colId="dstAddr" sortable>Dst Address </td>
+                    <td colId="srcPort" sortable>Src Port </td>
+                    <td colId="dstPort" sortable>Dst Port </td>
+                    <td colId="insMask" sortable>Ins Mask </td>
+                    <td colId="priority" sortable>Priority </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="table-body">
+            <table>
+                <tr ng-if="!tableData.length" class="no-data">
+                    <td colspan="3">
+                        {{annots.no_rows_msg}}
+                    </td>
+                </tr>
+
+                <tr ng-repeat="item in tableData track by $index"
+                    ng-click="selectCallback($event, item)"
+                    ng-class="{selected: item.id === selId}">
+                    <td>{{item.id}}</td>
+                    <td>{{item.srcAddr}}</td>
+                    <td>{{item.dstAddr}}</td>
+                    <td>{{item.srcPort}}</td>
+                    <td>{{item.dstPort}}</td>
+                    <td>{{item.insMask}}</td>
+                    <td>{{item.priority}}</td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+    <ov-int-mon-main-item-details-panel></ov-int-mon-main-item-details-panel>
+   
 </div>
