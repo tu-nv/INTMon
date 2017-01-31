@@ -32,7 +32,7 @@ import java.util.Collection;
 public class IntMonUiMessageHandler extends UiMessageHandler {
 
 //    private static final String SAMPLE_CUSTOM_DATA_REQ = "intMonMainDataRequest";
-    private static final String DATA_FLOW_FILTER_STRING_REQ = "intMonFlowFilterStringRequest";
+    private static final String INT_MON_FLOW_FILTER_ADD_REQUEST = "intMonFlowFilterAddRequest";
 //    private static final String SAMPLE_CUSTOM_DATA_RESP = "intMonMainDataResponse";
 
 //    private static final String NUMBER = "number";
@@ -81,7 +81,7 @@ public class IntMonUiMessageHandler extends UiMessageHandler {
     private final class intMonFlowFilterStringRequestHandler extends RequestHandler {
 
         private intMonFlowFilterStringRequestHandler() {
-            super(DATA_FLOW_FILTER_STRING_REQ);
+            super(INT_MON_FLOW_FILTER_ADD_REQUEST);
         }
 
         @Override

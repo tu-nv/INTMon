@@ -67,65 +67,111 @@
         </div>
     </div>
 <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <div class='int-mon-main-flow-filter'>
+        <div class="tabular-header">
+            <h2>FlowFilters ({{tableData.length}} total)</h2>
+            <div class="ctrl-btns">
+                <div class="refresh" ng-class="{active: autoRefresh}"
+                     icon icon-id="refresh" icon-size="36"
+                     tooltip tt-msg="autoRefreshTip"
+                     ng-click="toggleRefresh()">
+                       
+                </div>
 
-    <div class="tabular-header">
-        <h2>FlowFilters ({{tableData.length}} total)</h2>
-        <div class="ctrl-btns">
-            <div class="refresh" ng-class="{active: autoRefresh}"
-                 icon icon-id="refresh" icon-size="36"
-                 tooltip tt-msg="autoRefreshTip"
-                 ng-click="toggleRefresh()">
-                   
+                     <!-- tooltip tt-msg="uninstallTip" -->
+                <div icon icon-size="42" icon-id="garbage"
+                     ng-click="delFlowsFilter()"
+                     ng-class="{active: ctrlBtnState.selection}">
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-list" onos-table-resize>
+
+            <div class="table-header" onos-sortable-header>
+                <table>
+                    <tr>
+                        <td colId="id" sortable>FlowsFilter ID </td>
+                        <td colId="srcAddr" sortable>Src Address </td>
+                        <td colId="dstAddr" sortable>Dst Address </td>
+                        <td colId="srcPort" sortable>Src Port </td>
+                        <td colId="dstPort" sortable>Dst Port </td>
+                        <td colId="insMask" sortable>Ins Mask </td>
+                        <td colId="priority" sortable>Priority </td>
+                    </tr>
+                </table>
             </div>
 
-                 <!-- tooltip tt-msg="uninstallTip" -->
-            <div icon icon-size="42" icon-id="garbage"
-                 ng-click="delFlowsFilter()"
-                 ng-class="{active: ctrlBtnState.selection}">
+            <div class="table-body">
+                <table>
+                    <!-- <tr ng-if="!tableData.length" class="no-data">
+                        <td colspan="7">
+                            {{annots.no_rows_msg}}
+                        </td>
+                    </tr> -->
+
+                    <tr ng-repeat="item in tableData track by $index"
+                        ng-click="selectCallback($event, item)"
+                        ng-class="{selected: item.id === selId}">
+                        <td>{{item.id}}</td>
+                        <td>{{item.srcAddr}}</td>
+                        <td>{{item.dstAddr}}</td>
+                        <td>{{item.srcPort}}</td>
+                        <td>{{item.dstPort}}</td>
+                        <td>{{item.insMask}}</td>
+                        <td>{{item.priority}}</td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    <!-- <ov-int-mon-main-item-details-panel></ov-int-mon-main-item-details-panel> -->
+
+    <!-- <div class="int-mon-main-mon" ng-app="myApp" ng-controller="myAppCtrl">
+        <div class="tabular-header">
+            <h2>Flow Detail </h2>
+            <div class="ctrl-btns">
+                <div class="refresh" ng-class="{active: autoRefresh}"
+                     icon icon-id="refresh" icon-size="36"
+                     tooltip tt-msg="autoRefreshTipF"
+                     ng-click="toggleRefreshF()">                
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="summary-list" onos-table-resize>
+        <div class="summary-list" onos-table-resize>
 
-        <div class="table-header" onos-sortable-header>
+            <div class="table-header" onos-sortable-header>
+                <table>
+                    <tr>
+                        <td colId="idF" sortable>Flow ID </td>
+                        <td colId="srcAddrF" sortable>Src Address </td>
+                        <td colId="dstAddrF" sortable>Dst Address </td>
+                        <td colId="monDataF" sortable>Monitoring Data </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="table-body">
             <table>
-                <tr>
-                    <td colId="id" sortable>FlowsFilter ID </td>
-                    <td colId="srcAddr" sortable>Src Address </td>
-                    <td colId="dstAddr" sortable>Dst Address </td>
-                    <td colId="srcPort" sortable>Src Port </td>
-                    <td colId="dstPort" sortable>Dst Port </td>
-                    <td colId="insMask" sortable>Ins Mask </td>
-                    <td colId="priority" sortable>Priority </td>
-                </tr>
+                <tr ng-repeat="itemF in tableDataF track by $index"
+                        ng-click="selectCallbackF($event, itemF)"
+                        ng-class="{selected: itemF.idF === selIdF}">
+                        <td>{{itemF.idF}}</td>
+                        <td>{{itemF.srcAddrF}}</td>
+                        <td>{{itemF.dstAddrF}}</td>
+                        <td>{{itemF.monDataF}}</td>
+                    
+                    </tr>
             </table>
+            </div>
+
         </div>
+    </div> -->
 
-        <div class="table-body">
-            <table>
-                <tr ng-if="!tableData.length" class="no-data">
-                    <td colspan="3">
-                        {{annots.no_rows_msg}}
-                    </td>
-                </tr>
 
-                <tr ng-repeat="item in tableData track by $index"
-                    ng-click="selectCallback($event, item)"
-                    ng-class="{selected: item.id === selId}">
-                    <td>{{item.id}}</td>
-                    <td>{{item.srcAddr}}</td>
-                    <td>{{item.dstAddr}}</td>
-                    <td>{{item.srcPort}}</td>
-                    <td>{{item.dstPort}}</td>
-                    <td>{{item.insMask}}</td>
-                    <td>{{item.priority}}</td>
-                </tr>
-            </table>
-        </div>
-
-    </div>
-
-    <ov-int-mon-main-item-details-panel></ov-int-mon-main-item-details-panel>
-   
 </div>
+    <!-- +++++++++++++++++++++ -->
+   
+

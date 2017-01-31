@@ -1,8 +1,9 @@
 package org.onosproject.intmon;
 
-/**
- * Created by tu on 17. 1. 24.
- */
+import com.google.common.base.MoreObjects;
+
+import static com.google.common.base.MoreObjects.toStringHelper;
+
 public class IntDataNode {
     public Integer switchId;
     public Integer ingressPortId;
@@ -11,7 +12,7 @@ public class IntDataNode {
     public Integer ingressTstamp;
     public Integer egressPortId;
     public Integer qCongestion;
-    public Integer egressPortTxUtilization;
+    public Integer ePortTxUtilization;
 
     public IntDataNode() {
         switchId = null;
@@ -21,7 +22,22 @@ public class IntDataNode {
         ingressTstamp = null;
         egressPortId = null;
         qCongestion = null;
-        egressPortTxUtilization = null;
+        ePortTxUtilization = null;
+    }
+
+    @Override
+    public String toString() {
+        MoreObjects.ToStringHelper tsh = toStringHelper(getClass());
+        if (switchId != null) tsh = tsh.add("Switch ID", Integer.toString(switchId));
+        if (ingressPortId != null) tsh = tsh.add("Ingress Port ID", Integer.toString(ingressPortId));
+        if (hopLatency != null) tsh = tsh.add("Hop Latency", Integer.toString(hopLatency));
+        if (qOccupancy != null) tsh = tsh.add("Queue Occupancy", Integer.toString(qOccupancy));
+        if (ingressTstamp != null) tsh = tsh.add("Ingress Time-stamp", Integer.toString(ingressTstamp));
+        if (egressPortId != null) tsh = tsh.add("Egress Port ID", Integer.toString(egressPortId));
+        if (qCongestion != null) tsh = tsh.add("Queue Congestion", Integer.toString(qCongestion));
+        if (ePortTxUtilization != null) tsh = tsh.add("EPortTX Utilization", Integer.toString(ePortTxUtilization));
+
+        return tsh.toString();
     }
 }
 

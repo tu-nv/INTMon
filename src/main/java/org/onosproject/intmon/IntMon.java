@@ -19,6 +19,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -28,6 +29,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.onlab.packet.Ethernet;
 import org.onlab.packet.IPv4;
+import org.onlab.packet.Ip4Address;
 import org.onlab.packet.Ip4Prefix;
 import org.onlab.packet.IpAddress;
 import org.onlab.packet.UDP;
@@ -42,6 +44,7 @@ import org.onosproject.bmv2.api.service.Bmv2DeviceContextService;
 import org.onosproject.bmv2.ctl.Bmv2DeviceThriftClient;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
+import org.onosproject.net.ConnectPoint;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Host;
 import org.onosproject.net.device.DeviceService;
@@ -132,6 +135,7 @@ public class IntMon implements IntMonService {
     protected static final Bmv2DeviceContext INTMON_CONTEXT = new Bmv2DeviceContext(INTMON_CONFIGURATION, INTMON_INTERPRETER);
     private static final int FLOW_PRIORITY = 100;
     private Integer flowsFilterId = 1; // should not start with 0
+    private Integer fiveTupleFlowId = 1;
 
     private Map<String, Integer> tableMap;
 
@@ -141,6 +145,8 @@ public class IntMon implements IntMonService {
     // <id, insMask0007, priority>
     private Map<FlowsFilter, Triple<Integer, Integer, Integer>> flowsFilterInsMap = Maps.newHashMap();
     private Map<Integer, FlowsFilter> idFlowsFilterMap = Maps.newHashMap();
+
+    private Map<FiveTupleFlow, Pair<Integer, IntUDP>> lastestMonDataMap = Maps.newHashMap();
 
 
     @Activate
@@ -155,7 +161,7 @@ public class IntMon implements IntMonService {
 
         // set flow filter id starting to 1
         flowsFilterId = 1;
-
+        fiveTupleFlowId = 1;
         // deploy p4 program to devices
         deployDevices();
 
@@ -971,7 +977,27 @@ public class IntMon implements IntMonService {
 
             if (intUdpPkt.o != 1) return;
 
+            // now we has the intUDP pkt that send to onos at the last sw.
+            // we will store the last intUDP for each FiveTupleFlow
+            Ip4Address srcAddr = Ip4Address.valueOf(ipv4Pkt.getSourceAddress());
+            Integer srcPort = udpPkt.getSourcePort();
+            Ip4Address dstAddr = Ip4Address.valueOf(ipv4Pkt.getDestinationAddress());
+            Integer dstPort = udpPkt.getDestinationPort();
+
+            FiveTupleFlow fiveTupleFlow = new FiveTupleFlow(srcAddr, srcPort, dstAddr, dstPort);
+            if (lastestMonDataMap.containsKey(fiveTupleFlow)) {
+                Integer oldId = lastestMonDataMap.get(fiveTupleFlow).getLeft();
+                lastestMonDataMap.put(fiveTupleFlow, Pair.of(oldId, intUdpPkt));
+            } else {
+                lastestMonDataMap.put(fiveTupleFlow, Pair.of(fiveTupleFlowId, intUdpPkt));
+                fiveTupleFlowId++;
+            }
+//            log.info(intUdpPkt.getIntDataString());
 //            log.info("---received int to onos packet");
         }
     }
+
+    public Map<FiveTupleFlow, Pair<Integer, IntUDP>> getRawMonData(){
+        return Collections.unmodifiableMap(lastestMonDataMap);
+    };
 }

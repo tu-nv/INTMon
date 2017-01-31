@@ -1,15 +1,12 @@
 package org.onosproject.intmon;
 
-import org.onlab.packet.BasePacket;
-import org.onlab.packet.Data;
-import org.onlab.packet.Deserializer;
-import org.onlab.packet.IPacket;
+import com.google.common.base.MoreObjects;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
-import static org.onlab.packet.PacketUtils.checkHeaderLength;
-import static org.onlab.packet.PacketUtils.checkInput;
+import static com.google.common.base.MoreObjects.toStringHelper;
 
 public class IntUDP {
 
@@ -38,7 +35,7 @@ public class IntUDP {
     protected int originalPort; // 16
 
 //    protected byte[] monData;
-    protected ArrayList<IntDataNode> intDataNodeArr = new ArrayList<>();
+    protected LinkedList<IntDataNode> intDataNodeArr = new LinkedList<>();
 
     public static IntUDP deserialize(final byte[] data, final int offset,
                                final int length) {
@@ -86,8 +83,8 @@ public class IntUDP {
                     if ((insMask0007 & 0x02) != 0)
                         intDataNode.qCongestion = bb.getInt();
                     if ((insMask0007 & 0x01) != 0)
-                        intDataNode.egressPortTxUtilization = bb.getInt();
-                    intUDP.intDataNodeArr.add(intDataNode);
+                        intDataNode.ePortTxUtilization = bb.getInt();
+                    intUDP.intDataNodeArr.addFirst(intDataNode);
                 }
             }catch (final IndexOutOfBoundsException e) {
                 intUDP.intDataNodeArr = null;
@@ -97,6 +94,13 @@ public class IntUDP {
         return intUDP;
     }
 
+    public String getIntDataString() {
+        MoreObjects.ToStringHelper tsh = toStringHelper(getClass());
+        for (IntDataNode intDataNode : intDataNodeArr) {
+            tsh.add("SWITCH", intDataNode.toString());
+        }
+        return tsh.toString();
+    }
 //    public static Deserializer<IntUDP> deserializer() {
 //        return (data, offset, length) -> {
 //            checkInput(data, offset, length, UDP_HEADER_LEN_INT);
