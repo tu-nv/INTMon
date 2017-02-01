@@ -1,0 +1,37 @@
+/* css for sample table view */
+
+#ov-int-mon-flow-table h2 {
+    /* display: inline-block; */
+}
+td { 
+    white-space:pre /* keep the formarted string*/
+}
+/* Panel Styling */
+#ov-int-mon-flow-table-item-details-panel.floatpanel {
+    position: absolute;
+    top: 115px;
+}
+
+.light #ov-int-mon-flow-table-item-details-panel.floatpanel {
+    background-color: rgb(229, 234, 237);
+}
+.dark #ov-int-mon-flow-table-item-details-panel.floatpanel {
+    background-color: #3A4042;
+}
+
+#ov-int-mon-flow-table-item-details-panel h3 {
+    margin: 0;
+    font-size: large;
+}
+
+#ov-int-mon-flow-table-item-details-panel h4 {
+    margin: 0;
+}
+
+#ov-int-mon-flow-table-item-details-panel td {
+    padding: 5px;
+}
+#ov-int-mon-flow-table-item-details-panel td.label {
+    font-style: italic;
+    opacity: 0.8;
+}

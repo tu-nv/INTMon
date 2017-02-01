@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onosproject.intmon;
+package org.onosproject.intmon.ui;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.felix.scr.annotations.Activate;
@@ -31,13 +31,13 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * Skeletal ONOS UI Custom-View application component.
+ * Skeletal ONOS UI Table-View application component.
  */
 @Component(immediate = true)
-public class IntMonUiComponent {
+public class IntMonFlowTableComponent {
 
-    private static final String VIEW_ID = "intMonMain";
-    private static final String VIEW_TEXT = "Int Monitoring";
+    private static final String VIEW_ID = "intMonFlowTable";
+    private static final String VIEW_TEXT = "Mon Flows List";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -52,8 +52,7 @@ public class IntMonUiComponent {
     // Factory for UI message handlers
     private final UiMessageHandlerFactory messageHandlerFactory =
             () -> ImmutableList.of(
-                    new IntMonUiMessageHandler(),
-                    new IntMonUiTableMessageHandler()
+                    new IntMonFlowTableMessageHandler()
             );
 
     // Application UI extension

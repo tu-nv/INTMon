@@ -1,0 +1,43 @@
+<!-- partial HTML -->
+<div id="ov-int-mon-flow-table">
+    <div class="tabular-header">
+        <h2>Items ({{tableData.length}} total)</h2>
+        <div class="ctrl-btns">
+            <div class="refresh" ng-class="{active: autoRefresh}"
+                 icon icon-id="refresh" icon-size="36"
+                 tooltip tt-msg="autoRefreshTip"
+                 ng-click="toggleRefresh()"></div>
+        </div>
+    </div>
+
+    <div class="summary-list" onos-table-resize>
+
+            <div class="table-header" onos-sortable-header>
+                <table>
+                    <tr>
+                        <td colId="id" width="5%" sortable>Flow ID </td>
+                        <td colId="srcAddr" width="10%" sortable>Src Address </td>
+                        <td colId="dstAddr" width="10%" sortable>Dst Address </td>
+                        <td colId="monData" sortable>Monitoring Data </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="table-body">
+            <table>
+                <tr ng-repeat="item in tableData track by $index"
+                    ng-click="selectCallback($event, item)"
+                    ng-class="{selected: item.id === selId}">
+                    <td width="5%">{{item.id}}</td>
+                    <td width="10%">{{item.srcAddr}}</td>
+                    <td width="10%">{{item.dstAddr}}</td>
+                    <td>{{item.monData}}</td>
+                
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- <ov-int-mon-flow-table-item-details-panel></ov-int-mon-flow-table-item-details-panel> -->
+</div>

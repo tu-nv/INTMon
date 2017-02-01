@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onosproject.intmon;
+package org.onosproject.intmon.ui;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.onosproject.intmon.lib.FiveTupleFlow;
+import org.onosproject.intmon.lib.FlowsFilter;
+import org.onosproject.intmon.IntMonService;
+import org.onosproject.intmon.lib.IntUDP;
 import org.onosproject.ui.RequestHandler;
 import org.onosproject.ui.UiMessageHandler;
 import org.onosproject.ui.table.TableModel;
@@ -33,7 +37,7 @@ import java.util.Map;
 /**
  * Skeletal ONOS UI Table-View message handler.
  */
-public class IntMonUiTableMessageHandler extends UiMessageHandler {
+public class IntMonMainTableMessageHandler extends UiMessageHandler {
     // the name need to follow the convention, if not there will be error
     private static final String INT_MON_MAIN_ADD_FLOW_FILTERS = "intMonMainAddFlowFilters";
     private static final String INT_MON_MAIN_ADD_FLOW_FILTER_DATA_REQUEST = "intMonMainAddFlowFilterDataRequest";

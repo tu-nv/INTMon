@@ -1,4 +1,4 @@
-package org.onosproject.intmon;
+package org.onosproject.intmon.lib;
 
 import org.onlab.packet.Ip4Prefix;
 

@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onosproject.intmon;
+package org.onosproject.intmon.ui;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
 import org.onlab.packet.Ip4Address;
 import org.onlab.packet.Ip4Prefix;
+import org.onosproject.intmon.lib.FlowsFilter;
+import org.onosproject.intmon.IntMonService;
 import org.onosproject.ui.RequestHandler;
 import org.onosproject.ui.UiMessageHandler;
 import org.slf4j.Logger;
@@ -29,7 +31,7 @@ import java.util.Collection;
 /**
  * Skeletal ONOS UI Custom-View message handler.
  */
-public class IntMonUiMessageHandler extends UiMessageHandler {
+public class IntMonMainUiMessageHandler extends UiMessageHandler {
 
 //    private static final String SAMPLE_CUSTOM_DATA_REQ = "intMonMainDataRequest";
     private static final String INT_MON_FLOW_FILTER_ADD_REQUEST = "intMonFlowFilterAddRequest";

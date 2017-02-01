@@ -1,9 +1,8 @@
-package org.onosproject.intmon;
+package org.onosproject.intmon.lib;
 
 import com.google.common.base.MoreObjects;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
@@ -12,30 +11,30 @@ public class IntUDP {
 
     private static final int UDP_HEADER_LEN_INT = 12;
 
-    protected int controlFields; // 16 bits below
-    protected byte ver; // 2
-    protected byte rep; // 2
-    protected byte c; // 1
-    protected byte e; // 1
-    protected byte o; // 1 // sent to onos
-    protected byte rsvd1; // 4 // rsvd1 reduced from 5 to 4 bits
-    protected byte insCnt; // 5
+    public int controlFields; // 16 bits below
+    public byte ver; // 2
+    public byte rep; // 2
+    public byte c; // 1
+    public byte e; // 1
+    public byte o; // 1 // sent to onos
+    public byte rsvd1; // 4 // rsvd1 reduced from 5 to 4 bits
+    public byte insCnt; // 5
 
-    protected byte maxHopCnt; // 8
-    protected byte totalHopCnt; // 8
+    public byte maxHopCnt; // 8
+    public byte totalHopCnt; // 8
 
-    protected int instructionMask; // 16
+    public int instructionMask; // 16
 //    protected byte instructionMask0007; // 8
-    protected byte instructionMask0003; // 4 // split the bits for lookup
-    protected byte instructionMask0407; // 4
-    protected byte instructionMask0811; // 4
-    protected byte instructionMask1215; // 4
-    protected int rsvd2; // 16
-    protected int intLen; // 16
-    protected int originalPort; // 16
+    public byte instructionMask0003; // 4 // split the bits for lookup
+    public byte instructionMask0407; // 4
+    public byte instructionMask0811; // 4
+    public byte instructionMask1215; // 4
+    public int rsvd2; // 16
+    public int intLen; // 16
+    public int originalPort; // 16
 
 //    protected byte[] monData;
-    protected LinkedList<IntDataNode> intDataNodeArr = new LinkedList<>();
+    public LinkedList<IntDataNode> intDataNodeArr = new LinkedList<>();
 
     public static IntUDP deserialize(final byte[] data, final int offset,
                                final int length) {
@@ -69,21 +68,21 @@ public class IntUDP {
                 for (int i = 0; i < monDataLen / (4 * intUDP.insCnt); i++) {
                     IntDataNode intDataNode = new IntDataNode();
                     if ((insMask0007 & 0x80) != 0)
-                        intDataNode.switchId = bb.getInt();
+                        intDataNode.switchId = bb.getInt() & 0x7FFF_FFFF; // remove the bos bit
                     if ((insMask0007 & 0x40) != 0)
-                        intDataNode.ingressPortId = bb.getInt();
+                        intDataNode.ingressPortId = bb.getInt() & 0x7FFF_FFFF;
                     if ((insMask0007 & 0x20) != 0)
-                        intDataNode.hopLatency = bb.getInt();
+                        intDataNode.hopLatency = bb.getInt() & 0x7FFF_FFFF;
                     if ((insMask0007 & 0x10) != 0)
-                        intDataNode.qOccupancy = bb.getInt();
+                        intDataNode.qOccupancy = bb.getInt() & 0x7FFF_FFFF;
                     if ((insMask0007 & 0x08) != 0)
-                        intDataNode.ingressTstamp = bb.getInt();
+                        intDataNode.ingressTstamp = bb.getInt() & 0x7FFF_FFFF;
                     if ((insMask0007 & 0x04) != 0)
-                        intDataNode.egressPortId = bb.getInt();
+                        intDataNode.egressPortId = bb.getInt() & 0x7FFF_FFFF;
                     if ((insMask0007 & 0x02) != 0)
-                        intDataNode.qCongestion = bb.getInt();
+                        intDataNode.qCongestion = bb.getInt() & 0x7FFF_FFFF;
                     if ((insMask0007 & 0x01) != 0)
-                        intDataNode.ePortTxUtilization = bb.getInt();
+                        intDataNode.ePortTxUtilization = bb.getInt() & 0x7FFF_FFFF;
                     intUDP.intDataNodeArr.addFirst(intDataNode);
                 }
             }catch (final IndexOutOfBoundsException e) {
@@ -95,11 +94,18 @@ public class IntUDP {
     }
 
     public String getIntDataString() {
-        MoreObjects.ToStringHelper tsh = toStringHelper(getClass());
+//        MoreObjects.ToStringHelper tsh = toStringHelper(getClass());
+//        for (IntDataNode intDataNode : intDataNodeArr) {
+//            tsh.add("SWITCH", intDataNode.toString());
+//            tsh.addValue(System.getProperty("line.separator"));
+//        }
+//        return tsh.toString();
+
+        StringBuilder sb = new StringBuilder();
         for (IntDataNode intDataNode : intDataNodeArr) {
-            tsh.add("SWITCH", intDataNode.toString());
+            sb = sb.append("SWITCH: ").append(intDataNode.toString()).append("\n");
         }
-        return tsh.toString();
+        return sb.toString();
     }
 //    public static Deserializer<IntUDP> deserializer() {
 //        return (data, offset, length) -> {

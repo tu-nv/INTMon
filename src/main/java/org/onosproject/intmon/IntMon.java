@@ -44,7 +44,9 @@ import org.onosproject.bmv2.api.service.Bmv2DeviceContextService;
 import org.onosproject.bmv2.ctl.Bmv2DeviceThriftClient;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
-import org.onosproject.net.ConnectPoint;
+import org.onosproject.intmon.lib.FiveTupleFlow;
+import org.onosproject.intmon.lib.FlowsFilter;
+import org.onosproject.intmon.lib.IntUDP;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Host;
 import org.onosproject.net.device.DeviceService;
@@ -982,7 +984,7 @@ public class IntMon implements IntMonService {
             Ip4Address srcAddr = Ip4Address.valueOf(ipv4Pkt.getSourceAddress());
             Integer srcPort = udpPkt.getSourcePort();
             Ip4Address dstAddr = Ip4Address.valueOf(ipv4Pkt.getDestinationAddress());
-            Integer dstPort = udpPkt.getDestinationPort();
+            Integer dstPort = intUdpPkt.originalPort;
 
             FiveTupleFlow fiveTupleFlow = new FiveTupleFlow(srcAddr, srcPort, dstAddr, dstPort);
             if (lastestMonDataMap.containsKey(fiveTupleFlow)) {

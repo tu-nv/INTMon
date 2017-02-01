@@ -2,8 +2,10 @@ package org.onosproject.intmon;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.onosproject.intmon.lib.FiveTupleFlow;
+import org.onosproject.intmon.lib.FlowsFilter;
+import org.onosproject.intmon.lib.IntUDP;
 
-import java.util.List;
 import java.util.Map;
 
 public interface IntMonService {
