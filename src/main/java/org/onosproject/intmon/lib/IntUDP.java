@@ -1,9 +1,14 @@
 package org.onosproject.intmon.lib;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 
@@ -25,19 +30,22 @@ public class IntUDP {
 
     public int instructionMask; // 16
 //    protected byte instructionMask0007; // 8
-    public byte instructionMask0003; // 4 // split the bits for lookup
-    public byte instructionMask0407; // 4
-    public byte instructionMask0811; // 4
-    public byte instructionMask1215; // 4
+//    public byte instructionMask0003; // 4 // split the bits for lookup
+//    public byte instructionMask0407; // 4
+//    public byte instructionMask0811; // 4
+//    public byte instructionMask1215; // 4
     public int rsvd2; // 16
     public int intLen; // 16
     public int originalPort; // 16
 
-//    protected byte[] monData;
+    public int insMask0007;
+    //    protected byte[] monData;
     public LinkedList<IntDataNode> intDataNodeArr = new LinkedList<>();
 
+    public long recvTime = 0;
+
     public static IntUDP deserialize(final byte[] data, final int offset,
-                               final int length) {
+                                     final int length) {
         IntUDP intUDP = new IntUDP();
 
         final ByteBuffer bb = ByteBuffer.wrap(data, offset, length);
@@ -64,33 +72,39 @@ public class IntUDP {
                 monDataLen = bb.limit() - bb.position(); // should it return null?
             }
             try {
-                int insMask0007 = (intUDP.instructionMask >> 8) & 0xFF;
+                int insMask07 = (intUDP.instructionMask >> 8) & 0xFF;
+                intUDP.insMask0007 = insMask07;
                 for (int i = 0; i < monDataLen / (4 * intUDP.insCnt); i++) {
                     IntDataNode intDataNode = new IntDataNode();
-                    if ((insMask0007 & 0x80) != 0)
+                    if ((insMask07 & 0x80) != 0)
                         intDataNode.switchId = bb.getInt() & 0x7FFF_FFFF; // remove the bos bit
-                    if ((insMask0007 & 0x40) != 0)
+                    if ((insMask07 & 0x40) != 0)
                         intDataNode.ingressPortId = bb.getInt() & 0x7FFF_FFFF;
-                    if ((insMask0007 & 0x20) != 0)
+                    if ((insMask07 & 0x20) != 0)
                         intDataNode.hopLatency = bb.getInt() & 0x7FFF_FFFF;
-                    if ((insMask0007 & 0x10) != 0)
+                    if ((insMask07 & 0x10) != 0)
                         intDataNode.qOccupancy = bb.getInt() & 0x7FFF_FFFF;
-                    if ((insMask0007 & 0x08) != 0)
+                    if ((insMask07 & 0x08) != 0)
                         intDataNode.ingressTstamp = bb.getInt() & 0x7FFF_FFFF;
-                    if ((insMask0007 & 0x04) != 0)
+                    if ((insMask07 & 0x04) != 0)
                         intDataNode.egressPortId = bb.getInt() & 0x7FFF_FFFF;
-                    if ((insMask0007 & 0x02) != 0)
+                    if ((insMask07 & 0x02) != 0)
                         intDataNode.qCongestion = bb.getInt() & 0x7FFF_FFFF;
-                    if ((insMask0007 & 0x01) != 0)
+                    if ((insMask07 & 0x01) != 0)
                         intDataNode.ePortTxUtilization = bb.getInt() & 0x7FFF_FFFF;
                     intUDP.intDataNodeArr.addFirst(intDataNode);
                 }
-            }catch (final IndexOutOfBoundsException e) {
+            } catch (final IndexOutOfBoundsException e) {
                 intUDP.intDataNodeArr = null;
             }
         }
 
         return intUDP;
+    }
+
+    public void setRecvTime(long recvTime) {
+        this.recvTime = recvTime;
+//        return this;
     }
 
     public String getIntDataString() {
@@ -107,6 +121,57 @@ public class IntUDP {
         }
         return sb.toString();
     }
+
+    public Map<DevicePair, Integer> getDPairLinkUltiMap () {
+        if(!hasSwitchId() || !hasEPortTxUtilization()) return null;
+
+        Map<DevicePair, Integer> dPairLinkUltiMap = Maps.newHashMap();
+        for (int i = 0; i < intDataNodeArr.size() - 1; i++) {
+            IntDataNode idn = intDataNodeArr.get(i);
+            IntDataNode nextIdn = intDataNodeArr.get(i+1);
+            DevicePair dPair = new DevicePair(idn.switchId, nextIdn.switchId);
+            /*
+            FIXME: this should be link utilization, but use hop latency for demo
+            since the link utili has not been implemented in bmv2 yet
+            */
+            dPairLinkUltiMap.put(dPair, idn.hopLatency);
+        }
+
+        return dPairLinkUltiMap;
+    }
+
+    public boolean hasSwitchId() {
+        return ((insMask0007 & 0x80) != 0);
+    }
+
+    public boolean hasIngressPortId() {
+        return ((insMask0007 & 0x40) != 0);
+    }
+
+    public boolean hasHopLatency() {
+        return ((insMask0007 & 0x20) != 0);
+    }
+
+    public boolean hasQOccupancy() {
+        return ((insMask0007 & 0x10) != 0);
+    }
+
+    public boolean hasIngressTstamp() {
+        return ((insMask0007 & 0x08) != 0);
+    }
+
+    public boolean hasEgressPortId() {
+        return ((insMask0007 & 0x04) != 0);
+    }
+
+    public boolean hasQCongestion() {
+        return ((insMask0007 & 0x02) != 0);
+    }
+
+    public boolean hasEPortTxUtilization() {
+        return ((insMask0007 & 0x01) != 0);
+    }
+
 //    public static Deserializer<IntUDP> deserializer() {
 //        return (data, offset, length) -> {
 //            checkInput(data, offset, length, UDP_HEADER_LEN_INT);

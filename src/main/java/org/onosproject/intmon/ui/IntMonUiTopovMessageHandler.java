@@ -18,12 +18,19 @@ package org.onosproject.intmon.ui;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.tuple.Pair;
 import org.onlab.osgi.ServiceDirectory;
+import org.onosproject.intmon.IntMonService;
+import org.onosproject.intmon.lib.DevicePair;
+import org.onosproject.intmon.lib.FiveTupleFlow;
+import org.onosproject.intmon.lib.IntUDP;
 import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Element;
 import org.onosproject.net.HostId;
 import org.onosproject.net.Link;
+import org.onosproject.net.LinkKey;
 import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.host.HostService;
 import org.onosproject.net.link.LinkService;
@@ -32,14 +39,18 @@ import org.onosproject.ui.UiConnection;
 import org.onosproject.ui.UiMessageHandler;
 import org.onosproject.ui.topo.DeviceHighlight;
 import org.onosproject.ui.topo.Highlights;
+import org.onosproject.ui.topo.LinkHighlight;
 import org.onosproject.ui.topo.NodeBadge;
 import org.onosproject.ui.topo.NodeBadge.Status;
 import org.onosproject.ui.topo.TopoJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -49,9 +60,9 @@ import java.util.TimerTask;
  */
 public class IntMonUiTopovMessageHandler extends UiMessageHandler {
 
-    private static final String SAMPLE_TOPOV_DISPLAY_START = "intMonTopovDisplayStart";
-    private static final String SAMPLE_TOPOV_DISPLAY_UPDATE = "intMonTopovDisplayUpdate";
-    private static final String SAMPLE_TOPOV_DISPLAY_STOP = "intMonTopovDisplayStop";
+    private static final String INT_MON_TOPOV_DISPLAY_START = "intMonTopovDisplayStart";
+    private static final String INT_MON_TOPOV_DISPLAY_UPDATE = "intMonTopovDisplayUpdate";
+    private static final String INT_MON_TOPOV_DISPLAY_STOP = "intMonTopovDisplayStop";
 
     private static final String ID = "id";
     private static final String MODE = "mode";
@@ -75,6 +86,8 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
     private Link[] linkSet = EMPTY_LINK_SET;
     private int linkIndex;
 
+    protected IntMonService intMonService;
+    private Map<DevicePair, Link> dPairLinkMap = Maps.newHashMap();
 
     // ===============-=-=-=-=-=-======================-=-=-=-=-=-=-================================
 
@@ -101,7 +114,7 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
 
     private final class DisplayStartHandler extends RequestHandler {
         public DisplayStartHandler() {
-            super(SAMPLE_TOPOV_DISPLAY_START);
+            super(INT_MON_TOPOV_DISPLAY_START);
         }
 
         @Override
@@ -136,7 +149,7 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
 
     private final class DisplayUpdateHandler extends RequestHandler {
         public DisplayUpdateHandler() {
-            super(SAMPLE_TOPOV_DISPLAY_UPDATE);
+            super(INT_MON_TOPOV_DISPLAY_UPDATE);
         }
 
         @Override
@@ -153,7 +166,7 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
 
     private final class DisplayStopHandler extends RequestHandler {
         public DisplayStopHandler() {
-            super(SAMPLE_TOPOV_DISPLAY_STOP);
+            super(INT_MON_TOPOV_DISPLAY_STOP);
         }
 
         @Override
@@ -266,6 +279,11 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
         Set<Link> links = new HashSet<>();
         for (Link link : linkService.getActiveLinks()) {
             links.add(link);
+
+            Integer srcD = Integer.parseUnsignedInt(link.src().deviceId().uri().getFragment());
+            Integer dstD = Integer.parseUnsignedInt(link.dst().deviceId().uri().getFragment());
+            DevicePair dPair = new DevicePair(srcD, dstD);
+            dPairLinkMap.put(dPair, link);
         }
         linkSet = links.toArray(new Link[links.size()]);
         linkIndex = 0;
@@ -273,26 +291,54 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
     }
 
     private void sendLinkData() {
-        DemoLinkMap linkMap = new DemoLinkMap();
-        for (Link link : linkSet) {
-            linkMap.add(link);
-        }
-        DemoLink dl = linkMap.add(linkSet[linkIndex]);
-        dl.makeImportant().setLabel(Integer.toString(linkIndex));
-        log.debug("sending link data (index {})", linkIndex);
+        intMonService = get(IntMonService.class);
+        Map<FiveTupleFlow, Pair<Integer, IntUDP>> latestRawMonData = intMonService.getLatestRawMonData();
+        Map<DevicePair, Integer> dPairLinkUltiMap = Maps.newHashMap();
 
-        linkIndex += 1;
-        if (linkIndex >= linkSet.length) {
-            linkIndex = 0;
+        for (FiveTupleFlow ftf : latestRawMonData.keySet()) {
+            IntUDP intUDP = latestRawMonData.get(ftf).getRight();
+            // TODO: it is for demo, this should be also link utilization, queue opcupancy
+            if (intUDP.hasSwitchId() && intUDP.hasHopLatency()) {
+                dPairLinkUltiMap.putAll(intUDP.getDPairLinkUltiMap());
+            }
         }
 
         Highlights highlights = new Highlights();
-        for (DemoLink dlink : linkMap.biLinks()) {
-            highlights.add(dlink.highlight(null));
+        for (DevicePair dPair: dPairLinkMap.keySet()) {
+            if (dPairLinkUltiMap.containsKey(dPair)) {
+                Link link = dPairLinkMap.get(dPair);
+                Integer linkUtil = dPairLinkUltiMap.get(dPair);
+                DemoLink demoLink = new DemoLink(LinkKey.linkKey(link), link);
+                LinkHighlight lhl = new LinkHighlight(demoLink.linkId(), LinkHighlight.Flavor.PRIMARY_HIGHLIGHT).setLabel(linkUtil.toString());
+                highlights.add(lhl);
+            }
         }
+
 
         sendHighlights(highlights);
     }
+
+//    private void sendLinkData() {
+//        DemoLinkMap linkMap = new DemoLinkMap();
+//        for (Link link : linkSet) {
+//            linkMap.add(link);
+//        }
+//        DemoLink dl = linkMap.add(linkSet[linkIndex]);
+//        dl.makeImportant().setLabel(Integer.toString(linkIndex));
+//        log.debug("sending link data (index {})", linkIndex);
+//
+//        linkIndex += 1;
+//        if (linkIndex >= linkSet.length) {
+//            linkIndex = 0;
+//        }
+//
+//        Highlights highlights = new Highlights();
+//        for (DemoLink dlink : linkMap.biLinks()) {
+//            highlights.add(dlink.highlight(null));
+//        }
+//
+//        sendHighlights(highlights);
+//    }
 
     private synchronized void scheduleTask() {
         if (demoTask == null) {

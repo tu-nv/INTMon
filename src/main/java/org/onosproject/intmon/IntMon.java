@@ -979,14 +979,20 @@ public class IntMon implements IntMonService {
 
             if (intUdpPkt.o != 1) return;
 
+
             // now we has the intUDP pkt that send to onos at the last sw.
             // we will store the last intUDP for each FiveTupleFlow
+            // set time first
+            // TODO: improve performance (this process take much time)
+            intUdpPkt.setRecvTime(pc.time());
+
             Ip4Address srcAddr = Ip4Address.valueOf(ipv4Pkt.getSourceAddress());
             Integer srcPort = udpPkt.getSourcePort();
             Ip4Address dstAddr = Ip4Address.valueOf(ipv4Pkt.getDestinationAddress());
             Integer dstPort = intUdpPkt.originalPort;
 
             FiveTupleFlow fiveTupleFlow = new FiveTupleFlow(srcAddr, srcPort, dstAddr, dstPort);
+
             if (lastestMonDataMap.containsKey(fiveTupleFlow)) {
                 Integer oldId = lastestMonDataMap.get(fiveTupleFlow).getLeft();
                 lastestMonDataMap.put(fiveTupleFlow, Pair.of(oldId, intUdpPkt));
@@ -994,12 +1000,25 @@ public class IntMon implements IntMonService {
                 lastestMonDataMap.put(fiveTupleFlow, Pair.of(fiveTupleFlowId, intUdpPkt));
                 fiveTupleFlowId++;
             }
+
 //            log.info(intUdpPkt.getIntDataString());
 //            log.info("---received int to onos packet");
         }
     }
 
-    public Map<FiveTupleFlow, Pair<Integer, IntUDP>> getRawMonData(){
+    @Override
+    public Map<FiveTupleFlow, Pair<Integer, IntUDP>> getLatestRawMonData(){
+        removeOldMonData();
         return Collections.unmodifiableMap(lastestMonDataMap);
-    };
+    }
+
+    private void removeOldMonData() {
+        long curTime = System.currentTimeMillis();
+        for (FiveTupleFlow ftf : lastestMonDataMap.keySet()) {
+            // remove if timeout
+            if (curTime - lastestMonDataMap.get(ftf).getRight().recvTime > 5000) {
+                lastestMonDataMap.remove(ftf);
+            }
+        }
+    }
 }

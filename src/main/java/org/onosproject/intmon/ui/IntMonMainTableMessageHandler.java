@@ -81,6 +81,7 @@ public class IntMonMainTableMessageHandler extends UiMessageHandler {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     protected IntMonService intMonService;
+//    protected IntMonService intMonService = get(IntMonService.class);
 
     @Override
     protected Collection<RequestHandler> createRequestHandlers() {
@@ -147,6 +148,7 @@ public class IntMonMainTableMessageHandler extends UiMessageHandler {
 //        }
 
         private Map<FlowsFilter, Triple<Integer, Integer, Integer>> getAllFlowsFilter() {
+            // FIXME: is this efficient to get class every time the function is called?
             intMonService = get(IntMonService.class);
             return intMonService.getAllFlowsFilter();
         }
@@ -224,7 +226,7 @@ public class IntMonMainTableMessageHandler extends UiMessageHandler {
 
         private Map<FiveTupleFlow, Pair<Integer, IntUDP>> getRawMonData() {
             intMonService = get(IntMonService.class);
-            return intMonService.getRawMonData();
+            return intMonService.getLatestRawMonData();
         }
     }
 

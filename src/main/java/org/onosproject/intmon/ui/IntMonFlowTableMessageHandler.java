@@ -29,9 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.Override;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -135,7 +133,7 @@ public class IntMonFlowTableMessageHandler extends UiMessageHandler {
 
         private Map<FiveTupleFlow, Pair<Integer, IntUDP>> getRawMonData() {
             intMonService = get(IntMonService.class);
-            return intMonService.getRawMonData();
+            return intMonService.getLatestRawMonData();
         }
     }
 

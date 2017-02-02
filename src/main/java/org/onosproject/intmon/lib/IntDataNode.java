@@ -1,8 +1,5 @@
 package org.onosproject.intmon.lib;
 
-import com.google.common.base.MoreObjects;
-
-import static com.google.common.base.MoreObjects.toStringHelper;
 
 public class IntDataNode {
     public Integer switchId;
@@ -23,6 +20,51 @@ public class IntDataNode {
         egressPortId = null;
         qCongestion = null;
         ePortTxUtilization = null;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+//        if (!super.equals(obj)) {
+//            return false;
+//        }
+        if (!(obj instanceof IntDataNode)) {
+            return false;
+        }
+        IntDataNode other = (IntDataNode) obj;
+
+
+        if (!this.switchId.equals(other.switchId)) {
+            return false;
+        }
+        if (!this.ingressPortId.equals(other.ingressPortId)) {
+            return false;
+        }
+        if (!this.hopLatency.equals(other.hopLatency)) {
+            return false;
+        }
+        if (!this.qOccupancy.equals(other.qOccupancy)) {
+            return false;
+        }
+        if (!this.ingressTstamp.equals(other.ingressTstamp)) {
+            return false;
+        }
+        if (!this.egressPortId.equals(other.egressPortId)) {
+            return false;
+        }
+        if (!this.qCongestion.equals(other.qCongestion)) {
+            return false;
+        }
+        if (!this.ePortTxUtilization.equals(other.ePortTxUtilization)) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
