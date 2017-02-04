@@ -41,6 +41,7 @@ public class IntUDP {
     public int insMask0007;
     //    protected byte[] monData;
     public LinkedList<IntDataNode> intDataNodeArr = new LinkedList<>();
+    public Map<Integer, Integer> devIdPosMap = Maps.newHashMap();
 
     public long recvTime = 0;
 
@@ -76,8 +77,9 @@ public class IntUDP {
                 intUDP.insMask0007 = insMask07;
                 for (int i = 0; i < monDataLen / (4 * intUDP.insCnt); i++) {
                     IntDataNode intDataNode = new IntDataNode();
-                    if ((insMask07 & 0x80) != 0)
+                    if ((insMask07 & 0x80) != 0) {
                         intDataNode.switchId = bb.getInt() & 0x7FFF_FFFF; // remove the bos bit
+                    }
                     if ((insMask07 & 0x40) != 0)
                         intDataNode.ingressPortId = bb.getInt() & 0x7FFF_FFFF;
                     if ((insMask07 & 0x20) != 0)
@@ -93,6 +95,11 @@ public class IntUDP {
                     if ((insMask07 & 0x01) != 0)
                         intDataNode.ePortTxUtilization = bb.getInt() & 0x7FFF_FFFF;
                     intUDP.intDataNodeArr.addFirst(intDataNode);
+                }
+                //
+                for (int i = 0; i < intUDP.intDataNodeArr.size(); i++) {
+                    IntDataNode idn = intUDP.intDataNodeArr.get(i);
+                    intUDP.devIdPosMap.put(idn.switchId, i);
                 }
             } catch (final IndexOutOfBoundsException e) {
                 intUDP.intDataNodeArr = null;
@@ -138,6 +145,14 @@ public class IntUDP {
         }
 
         return dPairLinkUltiMap;
+    }
+
+    public Integer getHopLatencyOfDevId (Integer devId) {
+        Integer pos = devIdPosMap.get(devId);
+        if (pos == null) return 0;
+        IntDataNode idn = intDataNodeArr.get(pos);
+        if (idn == null) return 0;
+        return idn.hopLatency;
     }
 
     public boolean hasSwitchId() {

@@ -43,11 +43,11 @@
 #ov-int-mon-main h2 {
     display: inline-block;
 }
-#ov-int-mon-main .table-body{
+/* #ov-int-mon-main .table-body{
     display: inline-block;
     overflow-y: scroll;
     max-height:100px;
-}
+} */
 
 /* Panel Styling */
 #ov-int-mon-main-item-details-panel.floatpanel {

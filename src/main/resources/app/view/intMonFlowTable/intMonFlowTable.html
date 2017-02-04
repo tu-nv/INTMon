@@ -1,7 +1,28 @@
 <!-- partial HTML -->
 <div id="ov-int-mon-flow-table">
+
+<!-- <select ng-model="switchSelect" ng-options="sw.ID as sw.Title for sw in sws"
+    style="position:absolute;left:700px;top:200px;" 
+    ng-model="selectedSw" ng-change="onChange(selectedSw)">
+    <option value=""> select a switch </option>
+    
+</select> -->
+ <input type="text" ng-model="swId" style="position:absolute;left:850px;top:200px;">
+ <div class="button-panel">
+        <button type="button" class = "int-mon-button" ng-click="watchHopLatency()"
+        style="position:absolute;left:850px;top:250px;">
+            Watch
+        </button>
+    </div>
+
+    <canvas height="400" width="800"
+         class="chart chart-line" chart-data="data"
+        chart-labels="labels" chart-series="series" chart-options="options"
+        chart-dataset-override="datasetOverride" chart-click="onClick">
+    </canvas>
+
     <div class="tabular-header">
-        <h2>Items ({{tableData.length}} total)</h2>
+        <!-- <h2>Items ({{tableData.length}} total)</h2> -->
         <div class="ctrl-btns">
             <div class="refresh" ng-class="{active: autoRefresh}"
                  icon icon-id="refresh" icon-size="36"
@@ -15,9 +36,9 @@
             <div class="table-header" onos-sortable-header>
                 <table>
                     <tr>
-                        <td colId="id" width="5%" sortable>Flow ID </td>
-                        <td colId="srcAddr" width="10%" sortable>Src Address </td>
-                        <td colId="dstAddr" width="10%" sortable>Dst Address </td>
+                        <td colId="id" width="10%" sortable>FID </td>
+                        <td colId="srcAddr" width="15%" sortable>Src Address </td>
+                        <td colId="dstAddr" width="15%" sortable>Dst Address </td>
                         <td colId="monData" sortable>Monitoring Data </td>
                     </tr>
                 </table>

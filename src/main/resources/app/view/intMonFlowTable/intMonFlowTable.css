@@ -6,6 +6,26 @@
 td { 
     white-space:pre /* keep the formarted string*/
 }
+
+#ov-int-mon-flow-table .button-panel {
+    margin: 10px;
+    width: 200px;
+}
+
+.light #ov-int-mon-flow-table .button-panel {
+    background-color: #ccf;
+}
+
+.dark #ov-int-mon-flow-table .button-panel {
+    background-color: #444;
+}
+
+#ov-int-mon-flow-table .int-mon-button {
+    cursor: pointer;
+    padding: 4px;
+    text-align: center;
+}
+
 /* Panel Styling */
 #ov-int-mon-flow-table-item-details-panel.floatpanel {
     position: absolute;

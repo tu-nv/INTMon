@@ -13,4 +13,5 @@ public interface IntMonService {
     public void delFlowFilter(Integer id);
     public Map<FlowsFilter, Triple<Integer, Integer, Integer>> getAllFlowsFilter();
     public Map<FiveTupleFlow, Pair<Integer, IntUDP>> getLatestRawMonData();
+    public Map<Integer, FiveTupleFlow> getIdMonFlowMap();
 }

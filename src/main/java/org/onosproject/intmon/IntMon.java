@@ -149,6 +149,7 @@ public class IntMon implements IntMonService {
     private Map<Integer, FlowsFilter> idFlowsFilterMap = Maps.newHashMap();
 
     private Map<FiveTupleFlow, Pair<Integer, IntUDP>> lastestMonDataMap = Maps.newHashMap();
+    private Map<Integer, FiveTupleFlow> idMonFlowMap = Maps.newHashMap();
 
 
     @Activate
@@ -998,7 +999,9 @@ public class IntMon implements IntMonService {
                 lastestMonDataMap.put(fiveTupleFlow, Pair.of(oldId, intUdpPkt));
             } else {
                 lastestMonDataMap.put(fiveTupleFlow, Pair.of(fiveTupleFlowId, intUdpPkt));
+                idMonFlowMap.put(fiveTupleFlowId, fiveTupleFlow);
                 fiveTupleFlowId++;
+
             }
 
 //            log.info(intUdpPkt.getIntDataString());
@@ -1012,12 +1015,20 @@ public class IntMon implements IntMonService {
         return Collections.unmodifiableMap(lastestMonDataMap);
     }
 
+    @Override
+    public Map<Integer, FiveTupleFlow> getIdMonFlowMap() {
+        removeOldMonData();
+        return Collections.unmodifiableMap(idMonFlowMap);
+    }
+
     private void removeOldMonData() {
         long curTime = System.currentTimeMillis();
         for (FiveTupleFlow ftf : lastestMonDataMap.keySet()) {
             // remove if timeout
             if (curTime - lastestMonDataMap.get(ftf).getRight().recvTime > 5000) {
+                Integer id = lastestMonDataMap.get(ftf).getLeft();
                 lastestMonDataMap.remove(ftf);
+                idMonFlowMap.remove(id);
             }
         }
     }
