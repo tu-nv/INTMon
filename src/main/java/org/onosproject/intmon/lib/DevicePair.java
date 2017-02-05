@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class DevicePair {
 
-    Integer srcD;
-    Integer dstD;
+    public Integer srcD;
+    public Integer dstD;
 
     public DevicePair(Integer srcD, Integer dstD) {
         this.srcD = srcD;
@@ -22,7 +22,7 @@ public class DevicePair {
         }
 //        if (!super.equals(obj)) {
 //            return false;
-//        }
+//        }c
         if (!(obj instanceof DevicePair)) {
             return false;
         }

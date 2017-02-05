@@ -79,7 +79,7 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
     private HostService hostService;
     private LinkService linkService;
 
-    private final Timer timer = new Timer("sample-overlay");
+    private final Timer timer = new Timer("int-mon-topov-overlay");
     private TimerTask demoTask = null;
     private Mode currentMode = Mode.IDLE;
     private Element elementOfNote;
@@ -280,8 +280,10 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
         for (Link link : linkService.getActiveLinks()) {
             links.add(link);
 
-            Integer srcD = Integer.parseUnsignedInt(link.src().deviceId().uri().getFragment());
-            Integer dstD = Integer.parseUnsignedInt(link.dst().deviceId().uri().getFragment());
+            DeviceId srcDevId = (DeviceId) link.src().elementId();
+            DeviceId dstDevId = (DeviceId) link.dst().elementId();
+            Integer srcD = Integer.parseInt(srcDevId.uri().getFragment());
+            Integer dstD = Integer.parseInt(dstDevId.uri().getFragment());
             DevicePair dPair = new DevicePair(srcD, dstD);
             dPairLinkMap.put(dPair, link);
         }
@@ -293,6 +295,8 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
     private void sendLinkData() {
         intMonService = get(IntMonService.class);
         Map<FiveTupleFlow, Pair<Integer, IntUDP>> latestRawMonData = intMonService.getLatestRawMonData();
+        if (latestRawMonData == null) return;
+
         Map<DevicePair, Integer> dPairLinkUltiMap = Maps.newHashMap();
 
         for (FiveTupleFlow ftf : latestRawMonData.keySet()) {
@@ -309,11 +313,13 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
                 Link link = dPairLinkMap.get(dPair);
                 Integer linkUtil = dPairLinkUltiMap.get(dPair);
                 DemoLink demoLink = new DemoLink(LinkKey.linkKey(link), link);
-                LinkHighlight lhl = new LinkHighlight(demoLink.linkId(), LinkHighlight.Flavor.PRIMARY_HIGHLIGHT).setLabel(linkUtil.toString());
+                LinkHighlight lhl = new LinkHighlight(demoLink.linkId(), LinkHighlight.Flavor.PRIMARY_HIGHLIGHT)
+                        .setLabel(dPair.srcD.toString() + "->" + dPair.dstD +": " + linkUtil)
+//                        .addMod(LinkHighlight.MOD_ANIMATED)
+                        ;
                 highlights.add(lhl);
             }
         }
-
 
         sendHighlights(highlights);
     }
@@ -371,6 +377,8 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
                         break;
                 }
             } catch (Exception e) {
+                // disable the task, but seems not a good code
+                timer.cancel();
                 log.warn("Unable to process demo task: {}", e.getMessage());
                 log.debug("Oops", e);
             }

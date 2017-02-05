@@ -14,7 +14,7 @@
     // our overlay definition
     var overlay = {
         // NOTE: this must match the ID defined in AppUiTopovOverlay
-        overlayId: 'meowster-overlay',
+        overlayId: 'int-mon-topov-overlay',
         glyphId: '*star4',
         tooltip: 'Sample Meowster Topo Overlay',
 
@@ -139,5 +139,6 @@
             stds = _stds_;
             tov.register(overlay);
         }]);
+
 
 }());

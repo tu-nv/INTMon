@@ -36,11 +36,12 @@ import static org.onosproject.ui.topo.TopoConstants.Properties.VERSION;
 public class IntMonUiTopovOverlay extends UiTopoOverlay {
 
     // NOTE: this must match the ID defined in intMonTopov.js
-    private static final String OVERLAY_ID = "meowster-overlay";
+    private static final String OVERLAY_ID = "int-mon-topov-overlay";
 
-    private static final String MY_TITLE = "My App Rocks!";
-    private static final String MY_VERSION = "Beta-1.0.0042";
-    private static final String MY_DEVICE_TITLE = "I changed the title";
+    private static final String MY_TITLE = "IntMon Topo View";
+    private static final String MY_VERSION = "1.0.0";
+    private static final String MY_DEVICE_TITLE = "Device";
+    private static final String URI_FRAGMENT = "Short ID";
 
     private static final ButtonId FOO_BUTTON = new ButtonId("foo");
     private static final ButtonId BAR_BUTTON = new ButtonId("bar");
@@ -67,7 +68,9 @@ public class IntMonUiTopovOverlay extends UiTopoOverlay {
     @Override
     public void modifyDeviceDetails(PropertyPanel pp, DeviceId deviceId) {
         pp.title(MY_DEVICE_TITLE);
+//        pp.addProp(URI_FRAGMENT, URI_FRAGMENT);
         pp.removeProps(LATITUDE, LONGITUDE);
+        pp.addProp(URI_FRAGMENT, deviceId.uri().getFragment());
 
         pp.addButton(FOO_BUTTON)
                 .addButton(BAR_BUTTON);
