@@ -82,13 +82,13 @@ public class IntDataNode {
 //        if (ePortTxUtilization != null) tsh = tsh.add("EPortTX Utilization", Integer.toUnsignedString(ePortTxUtilization));
 
         if (switchId != null) sb = sb.append("Switch ID = ").append(Integer.toUnsignedString(switchId)).append(", ");
-        if (ingressPortId != null) sb = sb.append("Ingress Port ID = ").append(Integer.toUnsignedString(ingressPortId)).append(", ");
+        if (ingressPortId != null) sb = sb.append("InPort ID = ").append(Integer.toUnsignedString(ingressPortId)).append(", ");
         if (hopLatency != null) sb = sb.append("Hop Latency = ").append(Integer.toUnsignedString(hopLatency)).append(", ");
         if (qOccupancy != null) sb = sb.append("Queue Occupancy = ").append(Integer.toUnsignedString(qOccupancy)).append(", ");
         if (ingressTstamp != null) sb = sb.append("Ingress Time-stamp = ").append(Integer.toUnsignedString(ingressTstamp)).append(", ");
-        if (egressPortId != null) sb = sb.append("Egress Port ID = ").append(Integer.toUnsignedString(egressPortId)).append(", ");
-        if (qCongestion != null) sb = sb.append("Queue Congestion = ").append(Integer.toUnsignedString(qCongestion)).append(", ");
-        if (ePortTxUtilization != null) sb = sb.append("EPortTX Utilization = ").append(Integer.toUnsignedString(ePortTxUtilization)).append(", ");
+        if (egressPortId != null) sb = sb.append("EPort ID = ").append(Integer.toUnsignedString(egressPortId)).append(", ");
+        if (qCongestion != null) sb = sb.append("Queue Congestion = ").append(Double.toString(qCongestion/10.0)).append("%, ");
+        if (ePortTxUtilization != null) sb = sb.append("EPortTX Utilization = ").append(Integer.toUnsignedString(ePortTxUtilization)).append("Kbps, ");
 
 //        return tsh.toString();
         return sb.toString();

@@ -59,6 +59,14 @@
                 [
                     "deq_qdepth",
                     16
+                ],
+                [
+                    "deq_qcongestion",
+                    16
+                ],
+                [
+                    "tx_utilization",
+                    32
                 ]
             ],
             "length_exp": null,
@@ -1163,8 +1171,523 @@
     "meter_arrays": [],
     "actions": [
         {
-            "name": "int_set_header_0003_i14",
+            "name": "int_set_header_0003_i10",
             "id": 0,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_hop_latency_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_hop_latency_header",
+                                "hop_latency"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_timedelta"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_switch_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_switch_id_header",
+                                "switch_id"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_metadata",
+                                "switch_id"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "restore_port",
+            "id": 1,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "udp",
+                                "dstPort"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "i2e",
+                                "origin_port"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0003_i11",
+            "id": 2,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_occupancy_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_occupancy_header",
+                                "q_occupancy1"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_occupancy_header",
+                                "q_occupancy0"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qdepth"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_hop_latency_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_hop_latency_header",
+                                "hop_latency"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_timedelta"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_switch_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_switch_id_header",
+                                "switch_id"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_metadata",
+                                "switch_id"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "mirror_int_to_cpu",
+            "id": 3,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "clone_ingress_pkt_to_egress",
+                    "parameters": [
+                        {
+                            "type": "hexstr",
+                            "value": "0xfa"
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_transit",
+            "id": 4,
+            "runtime_data": [
+                {
+                    "name": "switch_id",
+                    "bitwidth": 32
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_metadata",
+                                "switch_id"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                },
+                {
+                    "op": "shift_left",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_metadata",
+                                "insert_byte_cnt"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_header",
+                                "ins_cnt"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x2"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0003_i12",
+            "id": 5,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_port_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_port_id_header",
+                                "ingress_port_id_1"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_port_id_header",
+                                "ingress_port_id_0"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "ingress_port"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_switch_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_switch_id_header",
+                                "switch_id"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_metadata",
+                                "switch_id"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0003_i13",
+            "id": 6,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_occupancy_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_occupancy_header",
+                                "q_occupancy1"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_occupancy_header",
+                                "q_occupancy0"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qdepth"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_port_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_port_id_header",
+                                "ingress_port_id_1"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_port_id_header",
+                                "ingress_port_id_0"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "ingress_port"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_switch_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_switch_id_header",
+                                "switch_id"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_metadata",
+                                "switch_id"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_first_sw",
+            "id": 7,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "i2e",
+                                "first_sw"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_2_bos",
+            "id": 8,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_hop_latency_header",
+                                "bos"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0003_i14",
+            "id": 9,
             "runtime_data": [],
             "primitives": [
                 {
@@ -1271,7 +1794,7 @@
         },
         {
             "name": "int_set_header_0003_i15",
-            "id": 1,
+            "id": 10,
             "runtime_data": [],
             "primitives": [
                 {
@@ -1313,7 +1836,7 @@
                             "type": "field",
                             "value": [
                                 "queueing_metadata",
-                                "enq_qdepth"
+                                "deq_qdepth"
                             ]
                         }
                     ]
@@ -1421,39 +1944,123 @@
             ]
         },
         {
-            "name": "count_packet",
-            "id": 2,
+            "name": "int_set_header_0407_i15",
+            "id": 11,
             "runtime_data": [],
             "primitives": [
                 {
-                    "op": "count",
+                    "op": "add_header",
                     "parameters": [
                         {
-                            "type": "counter_array",
-                            "value": "ingress_port_counter"
+                            "type": "header",
+                            "value": "int_egress_port_tx_utilization_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_tx_utilization_header",
+                                "egress_port_tx_utilization"
+                            ]
                         },
                         {
                             "type": "field",
                             "value": [
-                                "standard_metadata",
-                                "ingress_port"
+                                "queueing_metadata",
+                                "tx_utilization"
                             ]
                         }
                     ]
                 },
                 {
-                    "op": "count",
+                    "op": "add_header",
                     "parameters": [
                         {
-                            "type": "counter_array",
-                            "value": "egress_port_counter"
+                            "type": "header",
+                            "value": "int_q_congestion_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_congestion_header",
+                                "q_congestion"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qcongestion"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_id_header",
+                                "egress_port_id"
+                            ]
                         },
                         {
                             "type": "field",
                             "value": [
                                 "standard_metadata",
-                                "egress_spec"
+                                "egress_port"
                             ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_tstamp_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "shift_right",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_tstamp_header",
+                                "ingress_tstamp"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "enq_timestamp"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x10"
                         }
                     ]
                 }
@@ -1461,7 +2068,7 @@
         },
         {
             "name": "int_update_total_hop_cnt",
-            "id": 3,
+            "id": 12,
             "runtime_data": [],
             "primitives": [
                 {
@@ -1503,13 +2110,81 @@
         },
         {
             "name": "int_set_header_0407_i0",
-            "id": 4,
+            "id": 13,
             "runtime_data": [],
             "primitives": []
         },
         {
+            "name": "int_set_header_5_bos",
+            "id": 14,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_id_header",
+                                "bos"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_update_udp",
+            "id": 15,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_to_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "ipv4",
+                                "ipv4Len"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_metadata",
+                                "insert_byte_cnt"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_to_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "udp",
+                                "udpLen"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_metadata",
+                                "insert_byte_cnt"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "name": "set_egress_port",
-            "id": 5,
+            "id": 16,
             "runtime_data": [
                 {
                     "name": "port",
@@ -1536,89 +2211,46 @@
             ]
         },
         {
-            "name": "int_set_header_0407_i2",
-            "id": 6,
+            "name": "_drop",
+            "id": 17,
             "runtime_data": [],
             "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_congestion_header"
-                        }
-                    ]
-                },
                 {
                     "op": "modify_field",
                     "parameters": [
                         {
                             "type": "field",
                             "value": [
-                                "int_q_congestion_header",
-                                "q_congestion"
+                                "standard_metadata",
+                                "egress_spec"
                             ]
                         },
                         {
                             "type": "hexstr",
-                            "value": "0x7fffffff"
+                            "value": "0x1ff"
                         }
                     ]
                 }
             ]
         },
         {
-            "name": "int_set_header_0407_i3",
-            "id": 7,
+            "name": "int_set_header_3_bos",
+            "id": 18,
             "runtime_data": [],
             "primitives": [
                 {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_tx_utilization_header"
-                        }
-                    ]
-                },
-                {
                     "op": "modify_field",
                     "parameters": [
                         {
                             "type": "field",
                             "value": [
-                                "int_egress_port_tx_utilization_header",
-                                "egress_port_tx_utilization"
+                                "int_q_occupancy_header",
+                                "bos"
                             ]
                         },
                         {
                             "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_congestion_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_congestion_header",
-                                "q_congestion"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
+                            "value": "0x1"
                         }
                     ]
                 }
@@ -1626,7 +2258,7 @@
         },
         {
             "name": "send_to_cpu",
-            "id": 8,
+            "id": 19,
             "runtime_data": [],
             "primitives": [
                 {
@@ -1649,502 +2281,6 @@
         },
         {
             "name": "int_set_header_0407_i4",
-            "id": 9,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_id_header",
-                                "egress_port_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_port"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_source",
-            "id": 10,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "i2e",
-                                "source"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i5",
-            "id": 11,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_tx_utilization_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_tx_utilization_header",
-                                "egress_port_tx_utilization"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_id_header",
-                                "egress_port_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_port"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "mirror_int_to_cpu",
-            "id": 12,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "clone_ingress_pkt_to_egress",
-                    "parameters": [
-                        {
-                            "type": "hexstr",
-                            "value": "0xfa"
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i6",
-            "id": 13,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_congestion_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_congestion_header",
-                                "q_congestion"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_id_header",
-                                "egress_port_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_port"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_5_bos",
-            "id": 14,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_id_header",
-                                "bos"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i7",
-            "id": 15,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_tx_utilization_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_tx_utilization_header",
-                                "egress_port_tx_utilization"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_congestion_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_congestion_header",
-                                "q_congestion"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_id_header",
-                                "egress_port_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_port"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i8",
-            "id": 16,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_tstamp_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "shift_right",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_tstamp_header",
-                                "ingress_tstamp"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_timestamp"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x10"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_2_bos",
-            "id": 17,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_hop_latency_header",
-                                "bos"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i9",
-            "id": 18,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_tx_utilization_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_tx_utilization_header",
-                                "egress_port_tx_utilization"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_tstamp_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "shift_right",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_tstamp_header",
-                                "ingress_tstamp"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_timestamp"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x10"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i10",
-            "id": 19,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_congestion_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_congestion_header",
-                                "q_congestion"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_tstamp_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "shift_right",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_tstamp_header",
-                                "ingress_tstamp"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_timestamp"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x10"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i15",
             "id": 20,
             "runtime_data": [],
             "primitives": [
@@ -2153,56 +2289,6 @@
                     "parameters": [
                         {
                             "type": "header",
-                            "value": "int_egress_port_tx_utilization_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_tx_utilization_header",
-                                "egress_port_tx_utilization"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_congestion_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_congestion_header",
-                                "q_congestion"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
                             "value": "int_egress_port_id_header"
                         }
                     ]
@@ -2222,527 +2308,6 @@
                             "value": [
                                 "standard_metadata",
                                 "egress_port"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_tstamp_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "shift_right",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_tstamp_header",
-                                "ingress_tstamp"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_timestamp"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x10"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i11",
-            "id": 21,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_tx_utilization_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_tx_utilization_header",
-                                "egress_port_tx_utilization"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_congestion_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_congestion_header",
-                                "q_congestion"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_tstamp_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "shift_right",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_tstamp_header",
-                                "ingress_tstamp"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_timestamp"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x10"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i12",
-            "id": 22,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_id_header",
-                                "egress_port_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_port"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_tstamp_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "shift_right",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_tstamp_header",
-                                "ingress_tstamp"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_timestamp"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x10"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_6_bos",
-            "id": 23,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_congestion_header",
-                                "bos"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i13",
-            "id": 24,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_tx_utilization_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_tx_utilization_header",
-                                "egress_port_tx_utilization"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_id_header",
-                                "egress_port_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_port"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_tstamp_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "shift_right",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_tstamp_header",
-                                "ingress_tstamp"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_timestamp"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x10"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i14",
-            "id": 25,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_congestion_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_congestion_header",
-                                "q_congestion"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_id_header",
-                                "egress_port_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_port"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_tstamp_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "shift_right",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_tstamp_header",
-                                "ingress_tstamp"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_timestamp"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x10"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_to_onos",
-            "id": 26,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_header",
-                                "o"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_3_bos",
-            "id": 27,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_occupancy_header",
-                                "bos"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_first_sw",
-            "id": 28,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "i2e",
-                                "first_sw"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0003_i0",
-            "id": 29,
-            "runtime_data": [],
-            "primitives": []
-        },
-        {
-            "name": "int_set_header_0003_i1",
-            "id": 30,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_occupancy_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_occupancy_header",
-                                "q_occupancy1"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_occupancy_header",
-                                "q_occupancy0"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_qdepth"
                             ]
                         }
                     ]
@@ -2751,7 +2316,7 @@
         },
         {
             "name": "int_sink",
-            "id": 31,
+            "id": 21,
             "runtime_data": [],
             "primitives": [
                 {
@@ -3039,7 +2604,489 @@
             ]
         },
         {
-            "name": "int_set_header_0003_i2",
+            "name": "int_set_header_0407_i5",
+            "id": 22,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_tx_utilization_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_tx_utilization_header",
+                                "egress_port_tx_utilization"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "tx_utilization"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_id_header",
+                                "egress_port_id"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_port"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_1_bos",
+            "id": 23,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_port_id_header",
+                                "bos"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0407_i6",
+            "id": 24,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_congestion_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_congestion_header",
+                                "q_congestion"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qcongestion"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_id_header",
+                                "egress_port_id"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_port"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_6_bos",
+            "id": 25,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_congestion_header",
+                                "bos"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0407_i7",
+            "id": 26,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_tx_utilization_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_tx_utilization_header",
+                                "egress_port_tx_utilization"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "tx_utilization"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_congestion_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_congestion_header",
+                                "q_congestion"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qcongestion"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_id_header",
+                                "egress_port_id"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_port"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0_bos",
+            "id": 27,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_switch_id_header",
+                                "bos"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0407_i8",
+            "id": 28,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_tstamp_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "shift_right",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_tstamp_header",
+                                "ingress_tstamp"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "enq_timestamp"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x10"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0407_i9",
+            "id": 29,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_tx_utilization_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_tx_utilization_header",
+                                "egress_port_tx_utilization"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "tx_utilization"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_tstamp_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "shift_right",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_tstamp_header",
+                                "ingress_tstamp"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "enq_timestamp"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x10"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_to_onos",
+            "id": 30,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_header",
+                                "o"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0407_i10",
+            "id": 31,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_congestion_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_congestion_header",
+                                "q_congestion"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qcongestion"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_tstamp_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "shift_right",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_tstamp_header",
+                                "ingress_tstamp"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "enq_timestamp"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x10"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0407_i1",
             "id": 32,
             "runtime_data": [],
             "primitives": [
@@ -3048,7 +3095,7 @@
                     "parameters": [
                         {
                             "type": "header",
-                            "value": "int_hop_latency_header"
+                            "value": "int_egress_port_tx_utilization_header"
                         }
                     ]
                 },
@@ -3058,15 +3105,15 @@
                         {
                             "type": "field",
                             "value": [
-                                "int_hop_latency_header",
-                                "hop_latency"
+                                "int_egress_port_tx_utilization_header",
+                                "egress_port_tx_utilization"
                             ]
                         },
                         {
                             "type": "field",
                             "value": [
                                 "queueing_metadata",
-                                "deq_timedelta"
+                                "tx_utilization"
                             ]
                         }
                     ]
@@ -3074,14 +3121,171 @@
             ]
         },
         {
-            "name": "int_transit",
+            "name": "int_set_header_0407_i11",
             "id": 33,
-            "runtime_data": [
+            "runtime_data": [],
+            "primitives": [
                 {
-                    "name": "switch_id",
-                    "bitwidth": 32
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_tx_utilization_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_tx_utilization_header",
+                                "egress_port_tx_utilization"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "tx_utilization"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_congestion_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_congestion_header",
+                                "q_congestion"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qcongestion"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_tstamp_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "shift_right",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_tstamp_header",
+                                "ingress_tstamp"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "enq_timestamp"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x10"
+                        }
+                    ]
                 }
-            ],
+            ]
+        },
+        {
+            "name": "int_set_header_0407_i12",
+            "id": 34,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_id_header",
+                                "egress_port_id"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_port"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_tstamp_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "shift_right",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_tstamp_header",
+                                "ingress_tstamp"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "enq_timestamp"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x10"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_7_bos",
+            "id": 35,
+            "runtime_data": [],
             "primitives": [
                 {
                     "op": "modify_field",
@@ -3089,44 +3293,240 @@
                         {
                             "type": "field",
                             "value": [
-                                "int_metadata",
-                                "switch_id"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                },
-                {
-                    "op": "shift_left",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_metadata",
-                                "insert_byte_cnt"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_header",
-                                "ins_cnt"
+                                "int_egress_port_tx_utilization_header",
+                                "bos"
                             ]
                         },
                         {
                             "type": "hexstr",
-                            "value": "0x2"
+                            "value": "0x1"
                         }
                     ]
                 }
             ]
         },
         {
-            "name": "int_set_header_0003_i3",
-            "id": 34,
+            "name": "int_set_header_0407_i13",
+            "id": 36,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_tx_utilization_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_tx_utilization_header",
+                                "egress_port_tx_utilization"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "tx_utilization"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_id_header",
+                                "egress_port_id"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_port"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_tstamp_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "shift_right",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_tstamp_header",
+                                "ingress_tstamp"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "enq_timestamp"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x10"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0407_i14",
+            "id": 37,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_congestion_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_congestion_header",
+                                "q_congestion"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qcongestion"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_id_header",
+                                "egress_port_id"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_port"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_tstamp_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "shift_right",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_tstamp_header",
+                                "ingress_tstamp"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "enq_timestamp"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x10"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_4_bos",
+            "id": 38,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_tstamp_header",
+                                "bos"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0003_i0",
+            "id": 39,
+            "runtime_data": [],
+            "primitives": []
+        },
+        {
+            "name": "int_set_header_0003_i1",
+            "id": 40,
             "runtime_data": [],
             "primitives": [
                 {
@@ -3168,7 +3568,128 @@
                             "type": "field",
                             "value": [
                                 "queueing_metadata",
-                                "enq_qdepth"
+                                "deq_qdepth"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0407_i2",
+            "id": 41,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_congestion_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_congestion_header",
+                                "q_congestion"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qcongestion"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0003_i2",
+            "id": 42,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_hop_latency_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_hop_latency_header",
+                                "hop_latency"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_timedelta"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0003_i3",
+            "id": 43,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_occupancy_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_occupancy_header",
+                                "q_occupancy1"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_occupancy_header",
+                                "q_occupancy0"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qdepth"
                             ]
                         }
                     ]
@@ -3204,23 +3725,39 @@
             ]
         },
         {
-            "name": "int_set_header_7_bos",
-            "id": 35,
+            "name": "count_packet",
+            "id": 44,
             "runtime_data": [],
             "primitives": [
                 {
-                    "op": "modify_field",
+                    "op": "count",
                     "parameters": [
+                        {
+                            "type": "counter_array",
+                            "value": "ingress_port_counter"
+                        },
                         {
                             "type": "field",
                             "value": [
-                                "int_egress_port_tx_utilization_header",
-                                "bos"
+                                "standard_metadata",
+                                "ingress_port"
                             ]
+                        }
+                    ]
+                },
+                {
+                    "op": "count",
+                    "parameters": [
+                        {
+                            "type": "counter_array",
+                            "value": "egress_port_counter"
                         },
                         {
-                            "type": "hexstr",
-                            "value": "0x1"
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_spec"
+                            ]
                         }
                     ]
                 }
@@ -3228,7 +3765,7 @@
         },
         {
             "name": "int_set_header_0003_i4",
-            "id": 36,
+            "id": 45,
             "runtime_data": [],
             "primitives": [
                 {
@@ -3279,7 +3816,7 @@
         },
         {
             "name": "int_set_header_0003_i5",
-            "id": 37,
+            "id": 46,
             "runtime_data": [],
             "primitives": [
                 {
@@ -3321,7 +3858,7 @@
                             "type": "field",
                             "value": [
                                 "queueing_metadata",
-                                "enq_qdepth"
+                                "deq_qdepth"
                             ]
                         }
                     ]
@@ -3366,399 +3903,6 @@
                             "value": [
                                 "standard_metadata",
                                 "ingress_port"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0003_i6",
-            "id": 38,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_hop_latency_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_hop_latency_header",
-                                "hop_latency"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "deq_timedelta"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_port_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_port_id_header",
-                                "ingress_port_id_1"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_port_id_header",
-                                "ingress_port_id_0"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "ingress_port"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0003_i7",
-            "id": 39,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_occupancy_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_occupancy_header",
-                                "q_occupancy1"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_occupancy_header",
-                                "q_occupancy0"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_qdepth"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_hop_latency_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_hop_latency_header",
-                                "hop_latency"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "deq_timedelta"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_port_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_port_id_header",
-                                "ingress_port_id_1"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_port_id_header",
-                                "ingress_port_id_0"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "ingress_port"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0407_i1",
-            "id": 40,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_egress_port_tx_utilization_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_egress_port_tx_utilization_header",
-                                "egress_port_tx_utilization"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x7fffffff"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_update_udp",
-            "id": 41,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_to_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "ipv4",
-                                "ipv4Len"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_metadata",
-                                "insert_byte_cnt"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_to_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "udp",
-                                "udpLen"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_metadata",
-                                "insert_byte_cnt"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0003_i8",
-            "id": 42,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_switch_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_switch_id_header",
-                                "switch_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_metadata",
-                                "switch_id"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0003_i9",
-            "id": 43,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_occupancy_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_occupancy_header",
-                                "q_occupancy1"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_occupancy_header",
-                                "q_occupancy0"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_qdepth"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_switch_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_switch_id_header",
-                                "switch_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_metadata",
-                                "switch_id"
                             ]
                         }
                     ]
@@ -3767,7 +3911,7 @@
         },
         {
             "name": "int_set_sink",
-            "id": 44,
+            "id": 47,
             "runtime_data": [],
             "primitives": [
                 {
@@ -3790,7 +3934,7 @@
         },
         {
             "name": "int_source",
-            "id": 45,
+            "id": 48,
             "runtime_data": [
                 {
                     "name": "max_hop",
@@ -4129,226 +4273,38 @@
             ]
         },
         {
-            "name": "int_set_header_0003_i10",
-            "id": 46,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_hop_latency_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_hop_latency_header",
-                                "hop_latency"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "deq_timedelta"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_switch_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_switch_id_header",
-                                "switch_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_metadata",
-                                "switch_id"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_1_bos",
-            "id": 47,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_port_id_header",
-                                "bos"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0003_i11",
-            "id": 48,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_q_occupancy_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_occupancy_header",
-                                "q_occupancy1"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_q_occupancy_header",
-                                "q_occupancy0"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "enq_qdepth"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_hop_latency_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_hop_latency_header",
-                                "hop_latency"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "queueing_metadata",
-                                "deq_timedelta"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_switch_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_switch_id_header",
-                                "switch_id"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_metadata",
-                                "switch_id"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_4_bos",
+            "name": "int_set_header_0003_i6",
             "id": 49,
             "runtime_data": [],
             "primitives": [
                 {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_hop_latency_header"
+                        }
+                    ]
+                },
+                {
                     "op": "modify_field",
                     "parameters": [
                         {
                             "type": "field",
                             "value": [
-                                "int_ingress_tstamp_header",
-                                "bos"
+                                "int_hop_latency_header",
+                                "hop_latency"
                             ]
                         },
                         {
-                            "type": "hexstr",
-                            "value": "0x1"
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_timedelta"
+                            ]
                         }
                     ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0003_i12",
-            "id": 50,
-            "runtime_data": [],
-            "primitives": [
+                },
                 {
                     "op": "add_header",
                     "parameters": [
@@ -4392,7 +4348,200 @@
                             ]
                         }
                     ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0003_i7",
+            "id": 50,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_occupancy_header"
+                        }
+                    ]
                 },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_occupancy_header",
+                                "q_occupancy1"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_occupancy_header",
+                                "q_occupancy0"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qdepth"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_hop_latency_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_hop_latency_header",
+                                "hop_latency"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_timedelta"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_ingress_port_id_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_port_id_header",
+                                "ingress_port_id_1"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_ingress_port_id_header",
+                                "ingress_port_id_0"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "ingress_port"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0407_i3",
+            "id": 51,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_egress_port_tx_utilization_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_egress_port_tx_utilization_header",
+                                "egress_port_tx_utilization"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "tx_utilization"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "int_q_congestion_header"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "int_q_congestion_header",
+                                "q_congestion"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qcongestion"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "int_set_header_0003_i8",
+            "id": 52,
+            "runtime_data": [],
+            "primitives": [
                 {
                     "op": "add_header",
                     "parameters": [
@@ -4424,56 +4573,7 @@
             ]
         },
         {
-            "name": "int_set_header_0_bos",
-            "id": 51,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_switch_id_header",
-                                "bos"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "restore_port",
-            "id": 52,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "udp",
-                                "dstPort"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "i2e",
-                                "origin_port"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "int_set_header_0003_i13",
+            "name": "int_set_header_0003_i9",
             "id": 53,
             "runtime_data": [],
             "primitives": [
@@ -4516,51 +4616,7 @@
                             "type": "field",
                             "value": [
                                 "queueing_metadata",
-                                "enq_qdepth"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "int_ingress_port_id_header"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_port_id_header",
-                                "ingress_port_id_1"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "int_ingress_port_id_header",
-                                "ingress_port_id_0"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "ingress_port"
+                                "deq_qdepth"
                             ]
                         }
                     ]
@@ -4596,7 +4652,7 @@
             ]
         },
         {
-            "name": "_drop",
+            "name": "int_set_source",
             "id": 54,
             "runtime_data": [],
             "primitives": [
@@ -4606,13 +4662,13 @@
                         {
                             "type": "field",
                             "value": [
-                                "standard_metadata",
-                                "egress_spec"
+                                "i2e",
+                                "source"
                             ]
                         },
                         {
                             "type": "hexstr",
-                            "value": "0x1ff"
+                            "value": "0x1"
                         }
                     ]
                 }

@@ -158,6 +158,7 @@ public class IntMon implements IntMonService {
         appId = coreService.getAppId("org.onosproject.intmon");
         processor = new SwitchPacketProcesser();
         packetService.addProcessor(processor, PacketProcessor.director(3));
+//        packetService.addProcessor(processor, PacketProcessor.advisor(3));
         hostService.addListener(hostListener);
         bmv2ContextService.registerInterpreterClassLoader(INTMON_CONTEXT.interpreter().getClass(),
                                                           this.getClass().getClassLoader());
@@ -1004,6 +1005,8 @@ public class IntMon implements IntMonService {
 
             }
 
+            // drop the pkts
+//            pc.block();
 //            log.info(intUdpPkt.getIntDataString());
 //            log.info("---received int to onos packet");
         }

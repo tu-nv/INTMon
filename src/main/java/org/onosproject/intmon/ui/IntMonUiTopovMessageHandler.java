@@ -302,7 +302,7 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
         for (FiveTupleFlow ftf : latestRawMonData.keySet()) {
             IntUDP intUDP = latestRawMonData.get(ftf).getRight();
             // TODO: it is for demo, this should be also link utilization, queue opcupancy
-            if (intUDP.hasSwitchId() && intUDP.hasHopLatency()) {
+            if (intUDP.hasSwitchId() && intUDP.hasEPortTxUtilization()) {
                 dPairLinkUltiMap.putAll(intUDP.getDPairLinkUltiMap());
             }
         }
@@ -314,7 +314,7 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
                 Integer linkUtil = dPairLinkUltiMap.get(dPair);
                 DemoLink demoLink = new DemoLink(LinkKey.linkKey(link), link);
                 LinkHighlight lhl = new LinkHighlight(demoLink.linkId(), LinkHighlight.Flavor.PRIMARY_HIGHLIGHT)
-                        .setLabel(dPair.srcD.toString() + "->" + dPair.dstD +": " + linkUtil)
+                        .setLabel(dPair.srcD.toString() + "->" + dPair.dstD +": " + linkUtil + "Kbps")
 //                        .addMod(LinkHighlight.MOD_ANIMATED)
                         ;
                 highlights.add(lhl);

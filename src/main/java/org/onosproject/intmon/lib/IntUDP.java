@@ -137,11 +137,7 @@ public class IntUDP {
             IntDataNode idn = intDataNodeArr.get(i);
             IntDataNode nextIdn = intDataNodeArr.get(i+1);
             DevicePair dPair = new DevicePair(idn.switchId, nextIdn.switchId);
-            /*
-            FIXME: this should be link utilization, but use hop latency for demo
-            since the link utili has not been implemented in bmv2 yet
-            */
-            dPairLinkUltiMap.put(dPair, idn.hopLatency);
+            dPairLinkUltiMap.put(dPair, idn.ePortTxUtilization);
         }
 
         return dPairLinkUltiMap;
