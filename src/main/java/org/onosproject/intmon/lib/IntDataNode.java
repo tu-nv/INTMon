@@ -1,6 +1,8 @@
 package org.onosproject.intmon.lib;
 
 
+import java.util.Objects;
+
 public class IntDataNode {
     public Integer switchId;
     public Integer ingressPortId;
@@ -65,6 +67,11 @@ public class IntDataNode {
         }
 
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(switchId, ingressPortId, hopLatency, qOccupancy, ingressTstamp, egressPortId, qCongestion, ePortTxUtilization);
     }
 
     @Override

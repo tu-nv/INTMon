@@ -157,7 +157,7 @@ public class IntMon implements IntMonService {
         log.info("Started. PPAP");
         appId = coreService.getAppId("org.onosproject.intmon");
         processor = new SwitchPacketProcesser();
-        packetService.addProcessor(processor, PacketProcessor.director(3));
+        packetService.addProcessor(processor, PacketProcessor.director(0));
 //        packetService.addProcessor(processor, PacketProcessor.advisor(3));
         hostService.addListener(hostListener);
         bmv2ContextService.registerInterpreterClassLoader(INTMON_CONTEXT.interpreter().getClass(),
@@ -726,68 +726,6 @@ public class IntMon implements IntMonService {
         }
     }
 
-    // A listener of host events that generates flow rules each time a new host is added.
-    private class InternalHostListener implements HostListener {
-        @Override
-        public void event(HostEvent event) {
-            // host added. we do not need to do anything if host removed
-            Set<FlowRule> newRules = Sets.newHashSet();
-            if (event.type() == HOST_ADDED) {
-                // add rules for switch contains this host
-//                Host addedHost = event.prevSubject();
-//                DeviceId did = null;
-
-//                for (DeviceId did : switches) {
-//                    if (hostService.getConnectedHosts(did).contains(addedHost)) {
-//                        did = did;
-//                        break; // do not need to find anymore
-//                    }
-//                }
-                for (DeviceId did : switches) {
-                    installRuleSetSink(did);
-                    installRuleMirrorIntToCpu(did);
-                    installRuleSetFirstSw(did);
-                }
-
-                FlowRuleOperations.Builder opsBuilder = FlowRuleOperations.builder();
-                for (FlowsFilter flowsFilter: flowsFilterInsMap.keySet()) {
-                    for (DeviceId did : switches) {
-                        newRules.add(ruleIntSource(did, flowsFilter, flowsFilterInsMap.get(flowsFilter).getMiddle(),
-                                                   flowsFilterInsMap.get(flowsFilter).getRight()));
-                        newRules.add(ruleSetSource(did, flowsFilter, flowsFilterInsMap.get(flowsFilter).getRight()));
-                    }
-//                    removeFlowRules(flowsFilterRulesMap.get(flowsFilter));
-                    newRules.forEach(opsBuilder::remove);
-                    flowsFilterRulesMap.get(flowsFilter).addAll(newRules);
-                }
-
-//                try {
-//                    java.lang.Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-
-                opsBuilder = opsBuilder.newStage();
-                for (FlowsFilter flowsFilter: flowsFilterInsMap.keySet()) {
-//                    installFlowRules(flowsFilterRulesMap.get(flowsFilter));
-                    flowsFilterRulesMap.get(flowsFilter).forEach(opsBuilder::add);
-                }
-                flowRuleService.apply(opsBuilder.build());
-//                for (FlowRule rule : newRules) {
-//                    flowRuleService.applyFlowRules(rule);
-//                }
-
-                log.info("----------- new hosts ------------");
-            }
-        }
-
-        @Override
-        public boolean isRelevant(HostEvent event) {
-            return event.type() == HOST_ADDED;
-        }
-    }
-
-
     private void installMirrorId(DeviceId did) {
         try {
             Bmv2DeviceThriftClient client = (Bmv2DeviceThriftClient) bmv2Controller.getAgent(did);
@@ -796,6 +734,7 @@ public class IntMon implements IntMonService {
             log.info("error--- mirroring---");
         }
     }
+
 
     @Override
     public void setFlowFilter(FlowsFilter flowsFilter, Integer insMask0007, Integer priority) {
@@ -959,6 +898,67 @@ public class IntMon implements IntMonService {
         flowRuleService.apply(opsBuilder.build());
     }
 
+    // A listener of host events that generates flow rules each time a new host is added.
+    private class InternalHostListener implements HostListener {
+        @Override
+        public void event(HostEvent event) {
+            // host added. we do not need to do anything if host removed
+            Set<FlowRule> newRules = Sets.newHashSet();
+            if (event.type() == HOST_ADDED) {
+                // add rules for switch contains this host
+//                Host addedHost = event.prevSubject();
+//                DeviceId did = null;
+
+//                for (DeviceId did : switches) {
+//                    if (hostService.getConnectedHosts(did).contains(addedHost)) {
+//                        did = did;
+//                        break; // do not need to find anymore
+//                    }
+//                }
+                for (DeviceId did : switches) {
+                    installRuleSetSink(did);
+                    installRuleMirrorIntToCpu(did);
+                    installRuleSetFirstSw(did);
+                }
+
+                FlowRuleOperations.Builder opsBuilder = FlowRuleOperations.builder();
+                for (FlowsFilter flowsFilter: flowsFilterInsMap.keySet()) {
+                    for (DeviceId did : switches) {
+                        newRules.add(ruleIntSource(did, flowsFilter, flowsFilterInsMap.get(flowsFilter).getMiddle(),
+                                                   flowsFilterInsMap.get(flowsFilter).getRight()));
+                        newRules.add(ruleSetSource(did, flowsFilter, flowsFilterInsMap.get(flowsFilter).getRight()));
+                    }
+//                    removeFlowRules(flowsFilterRulesMap.get(flowsFilter));
+                    newRules.forEach(opsBuilder::remove);
+                    flowsFilterRulesMap.get(flowsFilter).addAll(newRules);
+                }
+
+//                try {
+//                    java.lang.Thread.sleep(100);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+
+                opsBuilder = opsBuilder.newStage();
+                for (FlowsFilter flowsFilter: flowsFilterInsMap.keySet()) {
+//                    installFlowRules(flowsFilterRulesMap.get(flowsFilter));
+                    flowsFilterRulesMap.get(flowsFilter).forEach(opsBuilder::add);
+                }
+                flowRuleService.apply(opsBuilder.build());
+//                for (FlowRule rule : newRules) {
+//                    flowRuleService.applyFlowRules(rule);
+//                }
+
+                log.info("----------- new hosts ------------");
+            }
+        }
+
+        @Override
+        public boolean isRelevant(HostEvent event) {
+            return event.type() == HOST_ADDED;
+        }
+    }
+
     private class SwitchPacketProcesser implements PacketProcessor {
         @Override
         public void process(PacketContext pc) {
@@ -1004,6 +1004,8 @@ public class IntMon implements IntMonService {
                 fiveTupleFlowId++;
 
             }
+
+            pc.block();
 
             // drop the pkts
 //            pc.block();
