@@ -46,10 +46,8 @@ import org.onosproject.ui.topo.TopoJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -85,9 +83,10 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
     private Element elementOfNote;
     private Link[] linkSet = EMPTY_LINK_SET;
     private int linkIndex;
+    private  DemoLinkMap linkMap = new DemoLinkMap();
 
     protected IntMonService intMonService;
-    private Map<DevicePair, Link> dPairLinkMap = Maps.newHashMap();
+    private Map<DevicePair, DemoLink> dPairLinkMap = Maps.newHashMap();
 
     // ===============-=-=-=-=-=-======================-=-=-=-=-=-=-================================
 
@@ -279,13 +278,15 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
         Set<Link> links = new HashSet<>();
         for (Link link : linkService.getActiveLinks()) {
             links.add(link);
-
-            DeviceId srcDevId = (DeviceId) link.src().elementId();
-            DeviceId dstDevId = (DeviceId) link.dst().elementId();
+            linkMap.add(link);
+        }
+        for (DemoLink dlink: linkMap.biLinks()) {
+            DeviceId srcDevId = (DeviceId) dlink.one().src().elementId();
+            DeviceId dstDevId = (DeviceId) dlink.one().dst().elementId();
             Integer srcD = Integer.parseInt(srcDevId.uri().getFragment());
             Integer dstD = Integer.parseInt(dstDevId.uri().getFragment());
             DevicePair dPair = new DevicePair(srcD, dstD);
-            dPairLinkMap.put(dPair, link);
+            dPairLinkMap.put(dPair, dlink);
         }
         linkSet = links.toArray(new Link[links.size()]);
         linkIndex = 0;
@@ -297,54 +298,61 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
         Map<FiveTupleFlow, Pair<Integer, IntUDP>> latestRawMonData = intMonService.getLatestRawMonData();
         if (latestRawMonData == null) return;
 
+        Highlights highlights = new Highlights();
         Map<DevicePair, Integer> dPairLinkUltiMap = Maps.newHashMap();
 
         for (FiveTupleFlow ftf : latestRawMonData.keySet()) {
             IntUDP intUDP = latestRawMonData.get(ftf).getRight();
-            // TODO: it is for demo, this should be also link utilization, queue opcupancy
             if (intUDP.hasSwitchId() && intUDP.hasEPortTxUtilization()) {
-                dPairLinkUltiMap.putAll(intUDP.getDPairLinkUltiMap());
+                Map<DevicePair, Integer> localDPairLinkUltiMap = intUDP.getDPairLinkUltiMap();
+                for (DevicePair dPair : localDPairLinkUltiMap.keySet()) {
+                    if (dPairLinkUltiMap.containsKey(dPair)) {
+                        int oldTxUtil = dPairLinkUltiMap.get(dPair);
+                        int newTxUtil = localDPairLinkUltiMap.get(dPair);
+                        dPairLinkUltiMap.put(dPair, (oldTxUtil > newTxUtil) ? oldTxUtil : newTxUtil);
+                    } else {
+                        dPairLinkUltiMap.put(dPair, localDPairLinkUltiMap.get(dPair));
+                    }
+                }
             }
         }
 
-        Highlights highlights = new Highlights();
         for (DevicePair dPair: dPairLinkMap.keySet()) {
             if (dPairLinkUltiMap.containsKey(dPair)) {
-                Link link = dPairLinkMap.get(dPair);
                 Integer linkUtil = dPairLinkUltiMap.get(dPair);
-                DemoLink demoLink = new DemoLink(LinkKey.linkKey(link), link);
-                LinkHighlight lhl = new LinkHighlight(demoLink.linkId(), LinkHighlight.Flavor.PRIMARY_HIGHLIGHT)
-                        .setLabel(dPair.srcD.toString() + "->" + dPair.dstD +": " + linkUtil + "Kbps")
-//                        .addMod(LinkHighlight.MOD_ANIMATED)
-                        ;
-                highlights.add(lhl);
+                DemoLink dlink = dPairLinkMap.get(dPair).makeImportant().setLabel(linkUtil.toString() + "Kbps");
+                highlights.add(dlink.highlight(null));
             }
         }
+
+//        for (DemoLink dlink : linkMap.biLinks()) {
+//            highlights.add(dlink.highlight(null));
+//        }
 
         sendHighlights(highlights);
     }
 
-//    private void sendLinkData() {
-//        DemoLinkMap linkMap = new DemoLinkMap();
-//        for (Link link : linkSet) {
-//            linkMap.add(link);
-//        }
-//        DemoLink dl = linkMap.add(linkSet[linkIndex]);
-//        dl.makeImportant().setLabel(Integer.toString(linkIndex));
-//        log.debug("sending link data (index {})", linkIndex);
-//
-//        linkIndex += 1;
-//        if (linkIndex >= linkSet.length) {
-//            linkIndex = 0;
-//        }
-//
-//        Highlights highlights = new Highlights();
-//        for (DemoLink dlink : linkMap.biLinks()) {
-//            highlights.add(dlink.highlight(null));
-//        }
-//
-//        sendHighlights(highlights);
-//    }
+    private void sendLinkDataa() {
+        DemoLinkMap linkMap = new DemoLinkMap();
+        for (Link link : linkSet) {
+            linkMap.add(link);
+        }
+        DemoLink dl = linkMap.add(linkSet[linkIndex]);
+        dl.makeImportant().setLabel(Integer.toString(linkIndex));
+        log.debug("sending link data (index {})", linkIndex);
+
+        linkIndex += 1;
+        if (linkIndex >= linkSet.length) {
+            linkIndex = 0;
+        }
+
+        Highlights highlights = new Highlights();
+        for (DemoLink dlink : linkMap.biLinks()) {
+            highlights.add(dlink.highlight(null));
+        }
+
+        sendHighlights(highlights);
+    }
 
     private synchronized void scheduleTask() {
         if (demoTask == null) {

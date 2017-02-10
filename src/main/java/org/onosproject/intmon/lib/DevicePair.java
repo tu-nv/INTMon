@@ -4,12 +4,12 @@ import java.util.Objects;
 
 public class DevicePair {
 
-    public Integer srcD;
-    public Integer dstD;
+    public Integer one;
+    public Integer two;
 
-    public DevicePair(Integer srcD, Integer dstD) {
-        this.srcD = srcD;
-        this.dstD = dstD;
+    public DevicePair(Integer one, Integer two) {
+        this.one = one;
+        this.two = two;
     }
 
     @Override
@@ -28,20 +28,22 @@ public class DevicePair {
         }
         DevicePair other = (DevicePair) obj;
 
-        if (!this.srcD.equals(other.srcD)) {
+        boolean equalOne = this.one.equals(other.one) && this.two.equals(other.two);
+        boolean equalTwo = this.one.equals(other.two) && this.two.equals(other.one);
+        if (!(equalOne || equalTwo)) {
             return false;
         }
 
-        if (!this.dstD.equals(other.dstD)) {
-            return false;
-        }
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(srcD, dstD);
+        if (one.compareTo(two) < 0) {
+            return Objects.hash(one, two);
+        }
+        return Objects.hash(two, one);
     }
 
 }
