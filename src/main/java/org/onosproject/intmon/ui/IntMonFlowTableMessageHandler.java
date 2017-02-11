@@ -18,27 +18,18 @@ package org.onosproject.intmon.ui;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.tuple.Pair;
-import org.joda.time.Duration;
-import org.joda.time.LocalDateTime;
-import org.joda.time.ReadableDuration;
-import org.onlab.packet.Ip4Address;
-import org.onlab.packet.Ip4Prefix;
 import org.onosproject.intmon.IntMonService;
 import org.onosproject.intmon.lib.FiveTupleFlow;
 import org.onosproject.intmon.lib.IntUDP;
 import org.onosproject.ui.RequestHandler;
 import org.onosproject.ui.UiMessageHandler;
-import org.onosproject.ui.chart.ChartModel;
-import org.onosproject.ui.chart.ChartRequestHandler;
 import org.onosproject.ui.table.TableModel;
 import org.onosproject.ui.table.TableRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.Override;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -147,19 +138,16 @@ public class IntMonFlowTableMessageHandler extends UiMessageHandler {
 
             Map<FiveTupleFlow, Pair<Integer, IntUDP>> intUDPMap = getRawMonData();
             for (FiveTupleFlow ftf : intUDPMap.keySet()) {
-                populateRowF(tm.addRow(), ftf, intUDPMap.get(ftf));
+                populateRow(tm.addRow(), ftf, intUDPMap.get(ftf));
             }
         }
 
-        private void populateRowF(TableModel.Row row, FiveTupleFlow ftf,
-                                  Pair<Integer, IntUDP> pairIdIntUDP) {
+        private void populateRow(TableModel.Row row, FiveTupleFlow ftf,
+                                 Pair<Integer, IntUDP> pairIdIntUDP) {
             row.cell(ID, pairIdIntUDP.getLeft())
                     .cell(SRC_ADDR, ftf.srcAddr.toString()+ ":" + ftf.srcPort.toString())
                     .cell(DST_ADDR, ftf.dstAddr.toString()+ ":" + ftf.dstPort.toString())
-//                    .cell(SRC_ADDR, ftf.srcAddr)
-//                    .cell(DST_ADDR, ftf.dstAddr)
                     .cell(MON_DATA, pairIdIntUDP.getRight().getIntDataString());
-//                    .cell(MON_DATA, "none");
         }
 
         private Map<FiveTupleFlow, Pair<Integer, IntUDP>> getRawMonData() {

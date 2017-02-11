@@ -77,6 +77,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -1006,8 +1007,6 @@ public class IntMon implements IntMonService {
             }
 
             pc.block();
-
-            // drop the pkts
 //            pc.block();
 //            log.info(intUdpPkt.getIntDataString());
 //            log.info("---received int to onos packet");
@@ -1028,13 +1027,18 @@ public class IntMon implements IntMonService {
 
     private void removeOldMonData() {
         long curTime = System.currentTimeMillis();
+        // see ConcurrentModificationException for details
+        Set<FiveTupleFlow> toRemoveFtf = Sets.newHashSet();
+        Set<Integer> toRemoveId = Sets.newHashSet();
         for (FiveTupleFlow ftf : lastestMonDataMap.keySet()) {
             // remove if timeout
             if (curTime - lastestMonDataMap.get(ftf).getRight().recvTime > 5000) {
                 Integer id = lastestMonDataMap.get(ftf).getLeft();
-                lastestMonDataMap.remove(ftf);
-                idMonFlowMap.remove(id);
+                toRemoveFtf.add(ftf);
+                toRemoveId.add(id);
             }
         }
+        toRemoveFtf.forEach(lastestMonDataMap::remove);
+        toRemoveId.forEach(idMonFlowMap::remove);
     }
 }
