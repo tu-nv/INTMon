@@ -21,16 +21,16 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.tuple.Pair;
 import org.onlab.osgi.ServiceDirectory;
-import org.onosproject.intmon.IntMonService;
-import org.onosproject.intmon.lib.DevicePair;
-import org.onosproject.intmon.lib.FiveTupleFlow;
-import org.onosproject.intmon.lib.IntUDP;
+import org.onosproject.bmv2.api.runtime.Bmv2DevicePair;
+import org.onosproject.bmv2.api.runtime.Bmv2FiveTupleFlow;
+import org.onosproject.bmv2.api.runtime.Bmv2IntUdp;
+import org.onosproject.bmv2.api.service.Bmv2IntMonService;
+//import org.onosproject.intmon.IntMonService;
 import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Element;
 import org.onosproject.net.HostId;
 import org.onosproject.net.Link;
-import org.onosproject.net.LinkKey;
 import org.onosproject.net.device.DeviceService;
 import org.onosproject.net.host.HostService;
 import org.onosproject.net.link.LinkService;
@@ -39,7 +39,6 @@ import org.onosproject.ui.UiConnection;
 import org.onosproject.ui.UiMessageHandler;
 import org.onosproject.ui.topo.DeviceHighlight;
 import org.onosproject.ui.topo.Highlights;
-import org.onosproject.ui.topo.LinkHighlight;
 import org.onosproject.ui.topo.NodeBadge;
 import org.onosproject.ui.topo.NodeBadge.Status;
 import org.onosproject.ui.topo.TopoJson;
@@ -85,8 +84,8 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
     private int linkIndex;
     private  DemoLinkMap linkMap = new DemoLinkMap();
 
-    protected IntMonService intMonService;
-    private Map<DevicePair, DemoLink> dPairLinkMap = Maps.newHashMap();
+    protected Bmv2IntMonService intMonService;
+    private Map<Bmv2DevicePair, DemoLink> dPairLinkMap = Maps.newHashMap();
 
     // ===============-=-=-=-=-=-======================-=-=-=-=-=-=-================================
 
@@ -285,7 +284,7 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
             DeviceId dstDevId = (DeviceId) dlink.one().dst().elementId();
             Integer srcD = Integer.parseInt(srcDevId.uri().getFragment());
             Integer dstD = Integer.parseInt(dstDevId.uri().getFragment());
-            DevicePair dPair = new DevicePair(srcD, dstD);
+            Bmv2DevicePair dPair = new Bmv2DevicePair(srcD, dstD);
             dPairLinkMap.put(dPair, dlink);
         }
         linkSet = links.toArray(new Link[links.size()]);
@@ -294,18 +293,18 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
     }
 
     private void sendLinkData() {
-        intMonService = get(IntMonService.class);
-        Map<FiveTupleFlow, Pair<Integer, IntUDP>> latestRawMonData = intMonService.getLatestRawMonData();
+        intMonService = get(Bmv2IntMonService.class);
+        Map<Bmv2FiveTupleFlow, Pair<Integer, Bmv2IntUdp>> latestRawMonData = intMonService.getLatestRawMonData();
         if (latestRawMonData == null) return;
 
         Highlights highlights = new Highlights();
-        Map<DevicePair, Integer> dPairLinkUltiMap = Maps.newHashMap();
+        Map<Bmv2DevicePair, Integer> dPairLinkUltiMap = Maps.newHashMap();
 
-        for (FiveTupleFlow ftf : latestRawMonData.keySet()) {
-            IntUDP intUDP = latestRawMonData.get(ftf).getRight();
+        for (Bmv2FiveTupleFlow ftf : latestRawMonData.keySet()) {
+            Bmv2IntUdp intUDP = latestRawMonData.get(ftf).getRight();
             if (intUDP.hasSwitchId() && intUDP.hasEPortTxUtilization()) {
-                Map<DevicePair, Integer> localDPairLinkUltiMap = intUDP.getDPairLinkUltiMap();
-                for (DevicePair dPair : localDPairLinkUltiMap.keySet()) {
+                Map<Bmv2DevicePair, Integer> localDPairLinkUltiMap = intUDP.getDPairLinkUltiMap();
+                for (Bmv2DevicePair dPair : localDPairLinkUltiMap.keySet()) {
                     if (dPairLinkUltiMap.containsKey(dPair)) {
                         int oldTxUtil = dPairLinkUltiMap.get(dPair);
                         int newTxUtil = localDPairLinkUltiMap.get(dPair);
@@ -317,7 +316,7 @@ public class IntMonUiTopovMessageHandler extends UiMessageHandler {
             }
         }
 
-        for (DevicePair dPair: dPairLinkMap.keySet()) {
+        for (Bmv2DevicePair dPair: dPairLinkMap.keySet()) {
             if (dPairLinkUltiMap.containsKey(dPair)) {
                 Integer linkUtil = dPairLinkUltiMap.get(dPair);
                 DemoLink dlink = dPairLinkMap.get(dPair).makeImportant().setLabel(linkUtil.toString() + "Kbps");

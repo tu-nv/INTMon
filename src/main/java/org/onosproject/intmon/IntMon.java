@@ -38,15 +38,16 @@ import org.onosproject.bmv2.api.context.Bmv2DefaultConfiguration;
 import org.onosproject.bmv2.api.context.Bmv2DeviceContext;
 import org.onosproject.bmv2.api.runtime.Bmv2ExtensionSelector;
 import org.onosproject.bmv2.api.runtime.Bmv2ExtensionTreatment;
+import org.onosproject.bmv2.api.runtime.Bmv2FiveTupleFlow;
+import org.onosproject.bmv2.api.runtime.Bmv2FlowsFilter;
+import org.onosproject.bmv2.api.runtime.Bmv2IntUdp;
 import org.onosproject.bmv2.api.runtime.Bmv2RuntimeException;
 import org.onosproject.bmv2.api.service.Bmv2Controller;
 import org.onosproject.bmv2.api.service.Bmv2DeviceContextService;
+import org.onosproject.bmv2.api.service.Bmv2IntMonService;
 import org.onosproject.bmv2.ctl.Bmv2DeviceThriftClient;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.core.CoreService;
-import org.onosproject.intmon.lib.FiveTupleFlow;
-import org.onosproject.intmon.lib.FlowsFilter;
-import org.onosproject.intmon.lib.IntUDP;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.Host;
 import org.onosproject.net.device.DeviceService;
@@ -77,7 +78,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -115,15 +115,18 @@ public class IntMon implements IntMonService {
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
     private Bmv2Controller bmv2Controller;
 
+//    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY)
+    private Bmv2IntMonService bmv2IntMonService;
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final int UDP_DST_PORT_INT = 54321;
-
     // variables
     private ApplicationId appId;
     private PacketProcessor processor;
     // no newHashSet --> error Failed creating the component instance
     private Set<DeviceId> switches = Sets.newHashSet();
+
     private Topology topo;
 
     private final HostListener hostListener = new InternalHostListener();
@@ -132,25 +135,25 @@ public class IntMon implements IntMonService {
     //    private static final String MODEL_NAME = "IntMon";
     //    private static final String JSON_CONFIG_PATH = "~/onos-p4-dev/p4src/build/default.json";
     private static final String JSON_CONFIG_PATH = "/intmon.json";
-
     private static final Bmv2Configuration INTMON_CONFIGURATION = loadConfiguration();
     private static final IntMonInterpreter INTMON_INTERPRETER = new IntMonInterpreter();
     protected static final Bmv2DeviceContext INTMON_CONTEXT = new Bmv2DeviceContext(INTMON_CONFIGURATION, INTMON_INTERPRETER);
     private static final int FLOW_PRIORITY = 100;
     private Integer flowsFilterId = 1; // should not start with 0
+
     private Integer fiveTupleFlowId = 1;
 
     private Map<String, Integer> tableMap;
-
     Set<FlowRule> dRules = Sets.newHashSet();
     // each flowFilter has 1 mask (integer) and a set of flowRules for it
-    private Map<FlowsFilter, Set<FlowRule>> flowsFilterRulesMap = Maps.newHashMap();
+    private Map<Bmv2FlowsFilter, Set<FlowRule>> flowsFilterRulesMap = Maps.newHashMap();
     // <id, insMask0007, priority>
-    private Map<FlowsFilter, Triple<Integer, Integer, Integer>> flowsFilterInsMap = Maps.newHashMap();
-    private Map<Integer, FlowsFilter> idFlowsFilterMap = Maps.newHashMap();
+    private Map<Bmv2FlowsFilter, Triple<Integer, Integer, Integer>> flowsFilterInsMap = Maps.newHashMap();
 
-    private Map<FiveTupleFlow, Pair<Integer, IntUDP>> lastestMonDataMap = Maps.newHashMap();
-    private Map<Integer, FiveTupleFlow> idMonFlowMap = Maps.newHashMap();
+    private Map<Integer, Bmv2FlowsFilter> idFlowsFilterMap = Maps.newHashMap();
+    private Map<Bmv2FiveTupleFlow, Pair<Integer, Bmv2IntUdp>> lastestMonDataMap = Maps.newHashMap();
+
+    private Map<Integer, Bmv2FiveTupleFlow> idMonFlowMap = Maps.newHashMap();
 
 
     @Activate
@@ -210,8 +213,10 @@ public class IntMon implements IntMonService {
     @Deactivate
     protected void deactivate() {
         log.info("Stopped");
+//        flowRuleService.removeFlowRulesById(appId);
         packetService.removeProcessor(processor);
         hostService.removeListener(hostListener);
+        processor = null;
     }
 /*
 * Flowrules that depend on host-did and choice, so we only need to store those rules
@@ -455,7 +460,7 @@ public class IntMon implements IntMonService {
         installMirrorId(did);
     }
 
-    private FlowRule ruleIntSource(DeviceId did, FlowsFilter flowsFilter, Integer insMask0007, Integer priority) {
+    private FlowRule ruleIntSource(DeviceId did, Bmv2FlowsFilter flowsFilter, Integer insMask0007, Integer priority) {
         int ins_cnt = 0;
         for (int j = 0; j < 8; j++) {
             if (((insMask0007 >> j) & 0x01) != 0) {
@@ -516,7 +521,7 @@ public class IntMon implements IntMonService {
         return rule;
     }
 
-    private FlowRule ruleSetSource(DeviceId did, FlowsFilter flowsFilter, Integer priority) {
+    private FlowRule ruleSetSource(DeviceId did, Bmv2FlowsFilter flowsFilter, Integer priority) {
 //        Set<Host> conHosts = Sets.newHashSet();
 //        List<FlowRule> flowRulesList = new ArrayList<>();
 //
@@ -738,7 +743,7 @@ public class IntMon implements IntMonService {
 
 
     @Override
-    public void setFlowFilter(FlowsFilter flowsFilter, Integer insMask0007, Integer priority) {
+    public void setFlowFilter(Bmv2FlowsFilter flowsFilter, Integer insMask0007, Integer priority) {
         /*
         * 3 case:
         * + same all: return;
@@ -770,7 +775,7 @@ public class IntMon implements IntMonService {
                 newRules.add(ruleIntSource(did, flowsFilter, insMask0007, priority));
                 newRules.add(ruleSetSource(did, flowsFilter, priority));
             }
-            for( FlowsFilter ff: flowsFilterRulesMap.keySet()) {
+            for( Bmv2FlowsFilter ff: flowsFilterRulesMap.keySet()) {
 //                removeFlowRules(flowsFilterRulesMap.get(ff));
                 flowsFilterRulesMap.get(ff).forEach(opsBuilder::remove);
             }
@@ -792,7 +797,7 @@ public class IntMon implements IntMonService {
 
             // reinstall all rule
             opsBuilder = opsBuilder.newStage();
-            for( FlowsFilter ff: flowsFilterRulesMap.keySet()) {
+            for( Bmv2FlowsFilter ff: flowsFilterRulesMap.keySet()) {
 //                installFlowRules(flowsFilterRulesMap.get(ff));
                 flowsFilterRulesMap.get(ff).forEach(opsBuilder::add);
             }
@@ -833,7 +838,7 @@ public class IntMon implements IntMonService {
         so we temporary change to remove and re-install all flowrule (performance decrease)
         */
        /*
-        FlowsFilter ffToDel = idFlowsFilterMap.get(id);
+        Bmv2FlowsFilter ffToDel = idFlowsFilterMap.get(id);
         for( FlowRule rule: flowsFilterRulesMap.get(ffToDel)) {
             flowRuleService.removeFlowRules(rule);
         }
@@ -844,9 +849,9 @@ public class IntMon implements IntMonService {
         */
 
         FlowRuleOperations.Builder opsBuilder = FlowRuleOperations.builder();
-        FlowsFilter ffToDel = idFlowsFilterMap.get(id);
+        Bmv2FlowsFilter ffToDel = idFlowsFilterMap.get(id);
         // remove all rules
-        for( FlowsFilter ff: flowsFilterRulesMap.keySet()) {
+        for( Bmv2FlowsFilter ff: flowsFilterRulesMap.keySet()) {
 //            removeFlowRules(flowsFilterRulesMap.get(ff));
             flowsFilterRulesMap.get(ff).forEach(opsBuilder::remove);
         }
@@ -872,7 +877,7 @@ public class IntMon implements IntMonService {
         // reinstall remain rules
 //        installFlowRules(dRules);
         opsBuilder = opsBuilder.newStage();
-        for( FlowsFilter ff: flowsFilterRulesMap.keySet()) {
+        for( Bmv2FlowsFilter ff: flowsFilterRulesMap.keySet()) {
 //            installFlowRules(flowsFilterRulesMap.get(ff));
             flowsFilterRulesMap.get(ff).forEach(opsBuilder::add);
         }
@@ -883,7 +888,7 @@ public class IntMon implements IntMonService {
     }
 
     @Override
-    public Map<FlowsFilter, Triple<Integer, Integer, Integer>> getAllFlowsFilter() {
+    public Map<Bmv2FlowsFilter, Triple<Integer, Integer, Integer>> getAllFlowsFilter() {
         return Collections.unmodifiableMap(flowsFilterInsMap);
     }
 
@@ -923,26 +928,18 @@ public class IntMon implements IntMonService {
                 }
 
                 FlowRuleOperations.Builder opsBuilder = FlowRuleOperations.builder();
-                for (FlowsFilter flowsFilter: flowsFilterInsMap.keySet()) {
+                for (Bmv2FlowsFilter flowsFilter: flowsFilterInsMap.keySet()) {
                     for (DeviceId did : switches) {
                         newRules.add(ruleIntSource(did, flowsFilter, flowsFilterInsMap.get(flowsFilter).getMiddle(),
                                                    flowsFilterInsMap.get(flowsFilter).getRight()));
                         newRules.add(ruleSetSource(did, flowsFilter, flowsFilterInsMap.get(flowsFilter).getRight()));
                     }
-//                    removeFlowRules(flowsFilterRulesMap.get(flowsFilter));
-                    newRules.forEach(opsBuilder::remove);
+//                    newRules.forEach(opsBuilder::remove);
                     flowsFilterRulesMap.get(flowsFilter).addAll(newRules);
                 }
 
-//                try {
-//                    java.lang.Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-
-                opsBuilder = opsBuilder.newStage();
-                for (FlowsFilter flowsFilter: flowsFilterInsMap.keySet()) {
-//                    installFlowRules(flowsFilterRulesMap.get(flowsFilter));
+//                opsBuilder = opsBuilder.newStage();
+                for (Bmv2FlowsFilter flowsFilter: flowsFilterInsMap.keySet()) {
                     flowsFilterRulesMap.get(flowsFilter).forEach(opsBuilder::add);
                 }
                 flowRuleService.apply(opsBuilder.build());
@@ -960,6 +957,7 @@ public class IntMon implements IntMonService {
         }
     }
 
+    // This part is not used, since the packet Processor is moved to provided
     private class SwitchPacketProcesser implements PacketProcessor {
         @Override
         public void process(PacketContext pc) {
@@ -978,13 +976,13 @@ public class IntMon implements IntMonService {
             if (udpPkt.getDestinationPort() != UDP_DST_PORT_INT) return;
 
             byte[] intRaw = udpPkt.getPayload().serialize();
-            IntUDP intUdpPkt = IntUDP.deserialize(intRaw, 0, intRaw.length);
+            Bmv2IntUdp intUdpPkt = Bmv2IntUdp.deserialize(intRaw, 0, intRaw.length);
 
             if (intUdpPkt.o != 1) return;
 
 
             // now we has the intUDP pkt that send to onos at the last sw.
-            // we will store the last intUDP for each FiveTupleFlow
+            // we will store the last intUDP for each Bmv2FiveTupleFlow
             // set time first
             // TODO: improve performance (this process take much time)
             intUdpPkt.setRecvTime(pc.time());
@@ -994,7 +992,7 @@ public class IntMon implements IntMonService {
             Ip4Address dstAddr = Ip4Address.valueOf(ipv4Pkt.getDestinationAddress());
             Integer dstPort = intUdpPkt.originalPort;
 
-            FiveTupleFlow fiveTupleFlow = new FiveTupleFlow(srcAddr, srcPort, dstAddr, dstPort);
+            Bmv2FiveTupleFlow fiveTupleFlow = new Bmv2FiveTupleFlow(srcAddr, srcPort, dstAddr, dstPort);
 
             if (lastestMonDataMap.containsKey(fiveTupleFlow)) {
                 Integer oldId = lastestMonDataMap.get(fiveTupleFlow).getLeft();
@@ -1006,21 +1004,20 @@ public class IntMon implements IntMonService {
 
             }
 
-            pc.block();
 //            pc.block();
 //            log.info(intUdpPkt.getIntDataString());
-//            log.info("---received int to onos packet");
+            log.info("---received int to onos packet");
         }
     }
 
     @Override
-    public Map<FiveTupleFlow, Pair<Integer, IntUDP>> getLatestRawMonData(){
+    public Map<Bmv2FiveTupleFlow, Pair<Integer, Bmv2IntUdp>> getLatestRawMonData(){
         removeOldMonData();
         return Collections.unmodifiableMap(lastestMonDataMap);
     }
 
     @Override
-    public Map<Integer, FiveTupleFlow> getIdMonFlowMap() {
+    public Map<Integer, Bmv2FiveTupleFlow> getIdMonFlowMap() {
         removeOldMonData();
         return Collections.unmodifiableMap(idMonFlowMap);
     }
@@ -1028,9 +1025,9 @@ public class IntMon implements IntMonService {
     private void removeOldMonData() {
         long curTime = System.currentTimeMillis();
         // see ConcurrentModificationException for details
-        Set<FiveTupleFlow> toRemoveFtf = Sets.newHashSet();
+        Set<Bmv2FiveTupleFlow> toRemoveFtf = Sets.newHashSet();
         Set<Integer> toRemoveId = Sets.newHashSet();
-        for (FiveTupleFlow ftf : lastestMonDataMap.keySet()) {
+        for (Bmv2FiveTupleFlow ftf : lastestMonDataMap.keySet()) {
             // remove if timeout
             if (curTime - lastestMonDataMap.get(ftf).getRight().recvTime > 5000) {
                 Integer id = lastestMonDataMap.get(ftf).getLeft();

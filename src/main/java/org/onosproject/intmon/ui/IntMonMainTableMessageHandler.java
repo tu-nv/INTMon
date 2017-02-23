@@ -19,10 +19,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.onosproject.intmon.lib.FiveTupleFlow;
-import org.onosproject.intmon.lib.FlowsFilter;
+import org.onosproject.bmv2.api.runtime.Bmv2FiveTupleFlow;
+import org.onosproject.bmv2.api.runtime.Bmv2FlowsFilter;
+import org.onosproject.bmv2.api.runtime.Bmv2IntUdp;
+import org.onosproject.bmv2.api.service.Bmv2IntMonService;
 import org.onosproject.intmon.IntMonService;
-import org.onosproject.intmon.lib.IntUDP;
 import org.onosproject.ui.RequestHandler;
 import org.onosproject.ui.UiMessageHandler;
 import org.onosproject.ui.table.TableModel;
@@ -80,6 +81,7 @@ public class IntMonMainTableMessageHandler extends UiMessageHandler {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    protected Bmv2IntMonService bmv2IntMonService;
     protected IntMonService intMonService;
 //    protected IntMonService intMonService = get(IntMonService.class);
 
@@ -131,8 +133,8 @@ public class IntMonMainTableMessageHandler extends UiMessageHandler {
 //                populateRow(tm.addRow(), item);
 //            }
 
-            Map<FlowsFilter, Triple<Integer, Integer, Integer>> ffMap = getAllFlowsFilter();
-            for (FlowsFilter ff : ffMap.keySet()) {
+            Map<Bmv2FlowsFilter, Triple<Integer, Integer, Integer>> ffMap = getAllFlowsFilter();
+            for (Bmv2FlowsFilter ff : ffMap.keySet()) {
                 populateRow(tm.addRow(), ff, ffMap.get(ff));
             }
         }
@@ -147,13 +149,13 @@ public class IntMonMainTableMessageHandler extends UiMessageHandler {
 //                    .cell(PRIORITY, item.priority());
 //        }
 
-        private Map<FlowsFilter, Triple<Integer, Integer, Integer>> getAllFlowsFilter() {
+        private Map<Bmv2FlowsFilter, Triple<Integer, Integer, Integer>> getAllFlowsFilter() {
             // FIXME: is this efficient to get class every time the function is called?
             intMonService = get(IntMonService.class);
             return intMonService.getAllFlowsFilter();
         }
 
-        private void populateRow(TableModel.Row row, FlowsFilter ff,
+        private void populateRow(TableModel.Row row, Bmv2FlowsFilter ff,
                                  Triple<Integer, Integer, Integer> ffVal) {
             row.cell(ID, ffVal.getLeft())
                     .cell(SRC_ADDR, ff.ip4SrcPrefix)
@@ -207,14 +209,14 @@ public class IntMonMainTableMessageHandler extends UiMessageHandler {
 //                populateRow(tm.addRow(), item);
 //            }
 
-            Map<FiveTupleFlow, Pair<Integer, IntUDP>> intUDPMap = getRawMonData();
-            for (FiveTupleFlow ftf : intUDPMap.keySet()) {
+            Map<Bmv2FiveTupleFlow, Pair<Integer, Bmv2IntUdp>> intUDPMap = getRawMonData();
+            for (Bmv2FiveTupleFlow ftf : intUDPMap.keySet()) {
                 populateRowF(tm.addRow(), ftf, intUDPMap.get(ftf));
             }
         }
 
-        private void populateRowF(TableModel.Row row, FiveTupleFlow ftf,
-                                  Pair<Integer, IntUDP> pairIdIntUDP) {
+        private void populateRowF(TableModel.Row row, Bmv2FiveTupleFlow ftf,
+                                  Pair<Integer, Bmv2IntUdp> pairIdIntUDP) {
             row.cell(ID_F, pairIdIntUDP.getLeft())
 //                    .cell(SRC_ADDR_F, ftf.srcAddr.toString()+ ":" + ftf.srcPort.toString())
 //                    .cell(DST_ADDR_F, ftf.dstAddr.toString()+ ":" + ftf.dstAddr.toString())
@@ -224,9 +226,9 @@ public class IntMonMainTableMessageHandler extends UiMessageHandler {
                     .cell(MON_DATA_F, "none");
         }
 
-        private Map<FiveTupleFlow, Pair<Integer, IntUDP>> getRawMonData() {
-            intMonService = get(IntMonService.class);
-            return intMonService.getLatestRawMonData();
+        private Map<Bmv2FiveTupleFlow, Pair<Integer, Bmv2IntUdp>> getRawMonData() {
+            bmv2IntMonService = get(Bmv2IntMonService.class);
+            return bmv2IntMonService.getLatestRawMonData();
         }
     }
 

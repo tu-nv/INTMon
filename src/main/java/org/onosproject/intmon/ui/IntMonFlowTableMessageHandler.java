@@ -18,9 +18,10 @@ package org.onosproject.intmon.ui;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.tuple.Pair;
+import org.onosproject.bmv2.api.runtime.Bmv2FiveTupleFlow;
+import org.onosproject.bmv2.api.runtime.Bmv2IntUdp;
+import org.onosproject.bmv2.api.service.Bmv2IntMonService;
 import org.onosproject.intmon.IntMonService;
-import org.onosproject.intmon.lib.FiveTupleFlow;
-import org.onosproject.intmon.lib.IntUDP;
 import org.onosproject.ui.RequestHandler;
 import org.onosproject.ui.UiMessageHandler;
 import org.onosproject.ui.table.TableModel;
@@ -68,9 +69,9 @@ public class IntMonFlowTableMessageHandler extends UiMessageHandler {
     private static final String[] COLUMN_IDS = { ID, SRC_ADDR, DST_ADDR, MON_DATA };
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    protected IntMonService intMonService;
+    protected Bmv2IntMonService intMonService;
 
-    private FiveTupleFlow watchedFft = null;
+    private Bmv2FiveTupleFlow watchedFft = null;
     private Integer watchedSwId = null;
 
 //    private static final Integer NUM_WATCH_POINTS = 20;
@@ -136,27 +137,29 @@ public class IntMonFlowTableMessageHandler extends UiMessageHandler {
 //                populateRow(tm.addRow(), item);
 //            }
 
-            Map<FiveTupleFlow, Pair<Integer, IntUDP>> intUDPMap = getRawMonData();
-            for (FiveTupleFlow ftf : intUDPMap.keySet()) {
+            Map<Bmv2FiveTupleFlow, Pair<Integer, Bmv2IntUdp>> intUDPMap = getRawMonData();
+            for (Bmv2FiveTupleFlow ftf : intUDPMap.keySet()) {
                 populateRow(tm.addRow(), ftf, intUDPMap.get(ftf));
             }
+
+            // tmp
         }
 
-        private void populateRow(TableModel.Row row, FiveTupleFlow ftf,
-                                 Pair<Integer, IntUDP> pairIdIntUDP) {
+        private void populateRow(TableModel.Row row, Bmv2FiveTupleFlow ftf,
+                                 Pair<Integer, Bmv2IntUdp> pairIdIntUDP) {
             row.cell(ID, pairIdIntUDP.getLeft())
                     .cell(SRC_ADDR, ftf.srcAddr.toString()+ ":" + ftf.srcPort.toString())
                     .cell(DST_ADDR, ftf.dstAddr.toString()+ ":" + ftf.dstPort.toString())
                     .cell(MON_DATA, pairIdIntUDP.getRight().getIntDataString());
         }
 
-        private Map<FiveTupleFlow, Pair<Integer, IntUDP>> getRawMonData() {
-            intMonService = get(IntMonService.class);
+        private Map<Bmv2FiveTupleFlow, Pair<Integer, Bmv2IntUdp>> getRawMonData() {
+            intMonService = get(Bmv2IntMonService.class);
             return intMonService.getLatestRawMonData();
         }
     }
 
-    //set the watch paramenter: FiveTupleFlow and the switch ID
+    //set the watch paramenter: Bmv2FiveTupleFlow and the switch ID
     private final class IntMonWatchHopLatencyRequestHandler extends RequestHandler {
 
         private IntMonWatchHopLatencyRequestHandler() {
@@ -167,11 +170,11 @@ public class IntMonFlowTableMessageHandler extends UiMessageHandler {
         public void process(long sid, ObjectNode payload) {
 //            log.info("intMonFlowFilterStringRequest" + payload.toString());
 
-            intMonService = get(IntMonService.class);
+            intMonService = get(Bmv2IntMonService.class);
             Integer monFlowId = payload.get("flowId").asInt();
             Integer monSwId = payload.get("swId").asInt();
 
-            Map<Integer, FiveTupleFlow> idMonFlowMap = intMonService.getIdMonFlowMap();
+            Map<Integer, Bmv2FiveTupleFlow> idMonFlowMap = intMonService.getIdMonFlowMap();
             watchedFft = idMonFlowMap.get(monFlowId);
             watchedSwId = monSwId;
             // init wHopLatencyData
@@ -194,11 +197,11 @@ public class IntMonFlowTableMessageHandler extends UiMessageHandler {
 
             if(watchedFft == null || watchedSwId == null) return;
 //
-            intMonService = get(IntMonService.class);
-            Pair<Integer, IntUDP> idIntUDPMap = intMonService.getLatestRawMonData().get(watchedFft);
+            intMonService = get(Bmv2IntMonService.class);
+            Pair<Integer, Bmv2IntUdp> idIntUDPMap = intMonService.getLatestRawMonData().get(watchedFft);
             if (idIntUDPMap == null) return;
 
-            IntUDP intUDP = idIntUDPMap.getRight();
+            Bmv2IntUdp intUDP = idIntUDPMap.getRight();
             int hLatency = intUDP.getHopLatencyOfDevId(watchedSwId);
 
             ObjectNode result = objectNode();
@@ -233,10 +236,10 @@ public class IntMonFlowTableMessageHandler extends UiMessageHandler {
 //            if(watchedFft == null || watchedSwId == null) return;
 //
 //            intMonService = get(IntMonService.class);
-//            Pair<Integer, IntUDP> idIntUDPMap = intMonService.getLatestRawMonData().get(watchedFft);
+//            Pair<Integer, Bmv2IntUdp> idIntUDPMap = intMonService.getLatestRawMonData().get(watchedFft);
 //            if (idIntUDPMap == null) return;
 //
-//            IntUDP intUDP = idIntUDPMap.getRight();
+//            Bmv2IntUdp intUDP = idIntUDPMap.getRight();
 //            long lastTime = wHopLatencyData[NUM_WATCH_POINTS-1].time;
 //            long timeStepDis = (intUDP.recvTime - lastTime)/TIME_STEP_MILI_SEC;
 //            long recvTime = intUDP.recvTime;

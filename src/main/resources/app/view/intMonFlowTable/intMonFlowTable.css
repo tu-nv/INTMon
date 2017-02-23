@@ -3,13 +3,13 @@
 #ov-int-mon-flow-table h2 {
     /* display: inline-block; */
 }
-td { 
+#ov-int-mon-flow-table td {
     white-space:pre /* keep the formarted string*/
 }
 
 #ov-int-mon-flow-table .button-panel {
-    margin: 10px;
-    width: 200px;
+    margin: 0px;
+    width: 170px;
 }
 
 .light #ov-int-mon-flow-table .button-panel {
@@ -20,7 +20,7 @@ td {
     background-color: #444;
 }
 
-#ov-int-mon-flow-table .int-mon-button {
+#ov-int-mon-flow-table .int-mon-flow-button {
     cursor: pointer;
     padding: 4px;
     text-align: center;

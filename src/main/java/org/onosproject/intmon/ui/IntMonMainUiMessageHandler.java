@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
 import org.onlab.packet.Ip4Address;
 import org.onlab.packet.Ip4Prefix;
-import org.onosproject.intmon.lib.FlowsFilter;
+import org.onosproject.bmv2.api.runtime.Bmv2FlowsFilter;
 import org.onosproject.intmon.IntMonService;
 import org.onosproject.ui.RequestHandler;
 import org.onosproject.ui.UiMessageHandler;
@@ -125,7 +125,7 @@ public class IntMonMainUiMessageHandler extends UiMessageHandler {
                 priority = payload.get("priority").asInt();
             }
 
-            intMonService.setFlowFilter(new FlowsFilter(
+            intMonService.setFlowFilter(new Bmv2FlowsFilter(
                     ip4SrcPrefix, ip4DstPrefix,
                     ip4SrcPort, ip4DstPort), insMask0007, priority
             );
